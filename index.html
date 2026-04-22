@@ -127,6 +127,7 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
     <div class="chip" onclick="setSipFilter('bekliyor',this)">Bekliyor</div>
     <div class="chip" onclick="setSipFilter('onaylandi',this)">Onaylandı</div>
     <div class="chip" onclick="setSipFilter('teslim',this)">Teslim</div>
+    <div class="chip" onclick="setSipFilter('iade',this)">İade</div>
     <div class="chip" onclick="setSipFilter('iptal',this)">İptal</div>
   </div>
   <div id="siparisList"></div>
@@ -235,7 +236,8 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
     <div class="modal-title" id="urunModalTitle">Yeni Ürün</div>
     <input type="hidden" id="urunEditId">
     <div class="form-group"><label class="form-label">Ürün Adı *</label><input type="text" class="form-input" id="urunAdi" placeholder="örn: LED Ekran P3"></div>
-    <div class="form-group"><label class="form-label">Birim</label><input type="text" class="form-input" id="urunBirim" placeholder="örn: adet, m², panel"></div>
+    <div class="form-group"><label class="form-label">Birim</label><input type="text" class="form-input" id="urunBirim" placeholder="örn: adet, panel, m²"></div>
+    <div class="form-group"><label class="form-label">Toplam Stok (adet) *</label><input type="number" class="form-input" id="urunStok" placeholder="örn: 10" min="0" value="0"></div>
     <div class="form-group"><label class="form-label">Açıklama</label><textarea class="form-textarea" id="urunAciklama" placeholder="Ek bilgi..."></textarea></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-ghost" onclick="closeModal('urunModal')">İptal</button>
@@ -435,10 +437,46 @@ window.setFuarMonth=function(m){STATE.fuarMonthFilter=m;renderFuarlar();};
 
 window.openFuarDetail=function(fid){
   const f=FUARLAR.find(x=>x.id===fid); if(!f)return;
-  const fuarSip=STATE.siparisler.filter(s=>s.fuarId===fid);
+  const fuarSip=STATE.siparisler.filter(s=>s.fuarId===fid&&s.durum!=='iptal');
+  const st=fuarStatus(f);
+  const bitti=f.endDate<TODAY;
+
+  // Bu fuarda rezerve edilen ürünleri hesapla
+  const rezerveMap={};
+  fuarSip.forEach(s=>{
+    (s.urunler||[]).forEach(u=>{
+      rezerveMap[u.id]=(rezerveMap[u.id]||0)+u.adet;
+    });
+  });
+
+  // Stok özeti
+  const stokOzeti=STATE.urunler.filter(u=>rezerveMap[u.id]).map(u=>{
+    const rez=rezerveMap[u.id]||0;
+    const stok=u.stok||0;
+    const kalan=stok-rez;
+    const renk=kalan<=0?'var(--red)':kalan<=2?'var(--yellow)':'var(--green)';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span style="color:#fff">📦 ${u.ad}</span>
+      <span style="color:var(--yellow)">−${rez} rezerve</span>
+      <span style="color:${renk};font-weight:700">${kalan} kalan</span>
+    </div>`;
+  }).join('');
+
   document.getElementById('fuarDetailContent').innerHTML=`
     <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:4px">${f.name}</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${fmtD(f.startDate)}–${fmtD(f.endDate)} · ${f.venue}</div>
+
+    ${stokOzeti?`
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">📦 Stok Durumu</div>
+      <div class="card" style="margin-bottom:16px">${stokOzeti}</div>
+    `:''}
+
+    ${bitti?`
+      <button class="btn btn-full" style="background:rgba(38,222,129,0.15);border:1px solid var(--green);color:var(--green);margin-bottom:16px;font-weight:700" onclick="iadeOnayModal('${fid}')">
+        ♻️ Fuar Bitti — Stokları İade Et
+      </button>
+    `:''}
+
     <div class="divider"></div>
     <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Siparişler (${fuarSip.length})</div>
     ${fuarSip.length?fuarSip.map(s=>sipCard(s)).join(''):`<div class="empty-state" style="padding:20px"><div class="empty-icon">📺</div><div class="empty-text">Bu fuara ait sipariş yok</div></div>`}
@@ -447,11 +485,22 @@ window.openFuarDetail=function(fid){
   openM('fuarDetailModal');
 };
 
+window.iadeOnayModal=function(fid){
+  const f=FUARLAR.find(x=>x.id===fid);
+  const fuarSip=STATE.siparisler.filter(s=>s.fuarId===fid&&s.durum!=='iptal'&&s.durum!=='iade');
+  if(!fuarSip.length){showToast('ℹ️ İade edilecek sipariş yok');return;}
+  if(!confirm(`${f?.name} fuarının ${fuarSip.length} siparişi "İade" olarak işaretlensin mi? Stoklar serbest kalacak.`))return;
+  Promise.all(fuarSip.map(s=>updateDoc(doc(db,'siparisler',s.id),{durum:'iade'}))).then(()=>{
+    showToast('✅ Stoklar iade edildi!');
+    closeModal('fuarDetailModal');
+  }).catch(err=>showToast('❌ '+err.message));
+};
+
 // ── SİPARİŞ KARTI ──
 function sipCard(s){
   const m=STATE.musteriler.find(x=>x.id===s.musteriId);
   const f=FUARLAR.find(x=>x.id===s.fuarId);
-  const durumBadge={bekliyor:'<span class="badge badge-yellow">⏳ Bekliyor</span>',onaylandi:'<span class="badge badge-green">✅ Onaylandı</span>',iptal:'<span class="badge badge-red">❌ İptal</span>',teslim:'<span class="badge badge-blue">📦 Teslim</span>'};
+  const durumBadge={bekliyor:'<span class="badge badge-yellow">⏳ Bekliyor</span>',onaylandi:'<span class="badge badge-green">✅ Onaylandı</span>',iptal:'<span class="badge badge-red">❌ İptal</span>',teslim:'<span class="badge badge-blue">📦 Teslim</span>',iade:'<span class="badge badge-accent">♻️ İade</span>'};
   const urunler=s.urunler||[];
   return `<div class="siparis-card" onclick="openSipDetail('${s.id}')">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -569,7 +618,7 @@ window.openSipDetail=function(sid){
     ${s.not?`<div class="card" style="margin-bottom:16px"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">NOT</div><div style="font-size:13px;color:#fff">${s.not}</div></div>`:''}
     <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Durum</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">
-      ${['bekliyor','onaylandi','teslim','iptal'].map(d=>`<button class="btn ${s.durum===d?'btn-primary':'btn-ghost'} btn-sm" onclick="updateSipDurum('${sid}','${d}')">${{bekliyor:'⏳ Bekliyor',onaylandi:'✅ Onaylandı',teslim:'📦 Teslim',iptal:'❌ İptal'}[d]}</button>`).join('')}
+      ${['bekliyor','onaylandi','teslim','iade','iptal'].map(d=>`<button class="btn ${s.durum===d?'btn-primary':'btn-ghost'} btn-sm" onclick="updateSipDurum('${sid}','${d}')">${{bekliyor:'⏳ Bekliyor',onaylandi:'✅ Onaylandı',teslim:'📦 Teslim',iade:'♻️ İade',iptal:'❌ İptal'}[d]}</button>`).join('')}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-ghost btn-sm" onclick="editSiparis('${sid}')">✏️ Düzenle</button>
@@ -640,33 +689,68 @@ window.deleteMusteri=async function(mid){if(!confirm('Müşteri silinsin mi?'))r
 // ── ÜRÜNLER ──
 window.renderUrunler=function(){
   document.getElementById('urunCount').textContent=STATE.urunler.length+' ürün';
-  document.getElementById('urunList').innerHTML=STATE.urunler.length?STATE.urunler.map(u=>`
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
+
+  document.getElementById('urunList').innerHTML=STATE.urunler.length?STATE.urunler.map(u=>{
+    // Aktif siparişlerde bu üründen kaç adet rezerve
+    const rezerve = STATE.siparisler
+      .filter(s=>s.durum!=='iptal' && s.durum!=='iade')
+      .reduce((top,s)=>{
+        const satirlar=s.urunler||[];
+        const satir=satirlar.find(x=>x.id===u.id);
+        return top+(satir?satir.adet:0);
+      },0);
+    const stok=u.stok||0;
+    const kalan=stok-rezerve;
+    const kalanRenk=kalan<=0?'var(--red)':kalan<=2?'var(--yellow)':'var(--green)';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
         <div>
           <div style="font-size:15px;font-weight:700;color:#fff">📦 ${u.ad}</div>
           ${u.birim?`<div style="font-size:12px;color:var(--muted);margin-top:2px">Birim: ${u.birim}</div>`:''}
-          ${u.aciklama?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${u.aciklama}</div>`:''}
         </div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost btn-sm" onclick="openUrunModal('${u.id}')">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteUrun('${u.id}')">🗑️</button>
         </div>
       </div>
-    </div>`).join(''):`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Henüz ürün yok<br><span style="font-size:12px">+ butonuyla ekle</span></div></div>`;
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:#fff">${stok}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase">Toplam</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--yellow)">${rezerve}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase">Rezerve</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:${kalanRenk}">${kalan}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase">Kalan</div>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Henüz ürün yok<br><span style="font-size:12px">+ butonuyla ekle</span></div></div>`;
 };
 
 window.openUrunModal=function(uid=null){
   ['urunAdi','urunBirim','urunAciklama'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('urunStok').value='0';
   document.getElementById('urunEditId').value='';
   document.getElementById('urunModalTitle').textContent='Yeni Ürün';
-  if(uid){const u=STATE.urunler.find(x=>x.id===uid);if(u){document.getElementById('urunEditId').value=uid;document.getElementById('urunModalTitle').textContent='Ürün Düzenle';document.getElementById('urunAdi').value=u.ad||'';document.getElementById('urunBirim').value=u.birim||'';document.getElementById('urunAciklama').value=u.aciklama||'';}}
+  if(uid){const u=STATE.urunler.find(x=>x.id===uid);if(u){
+    document.getElementById('urunEditId').value=uid;
+    document.getElementById('urunModalTitle').textContent='Ürün Düzenle';
+    document.getElementById('urunAdi').value=u.ad||'';
+    document.getElementById('urunBirim').value=u.birim||'';
+    document.getElementById('urunAciklama').value=u.aciklama||'';
+    document.getElementById('urunStok').value=u.stok||0;
+  }}
   openM('urunModal');
 };
 window.saveUrun=async function(){
   const ad=document.getElementById('urunAdi').value.trim();
   if(!ad){showToast('⚠️ Ürün adı girin');return;}
-  const data={ad,birim:document.getElementById('urunBirim').value,aciklama:document.getElementById('urunAciklama').value};
+  const stok=parseInt(document.getElementById('urunStok').value)||0;
+  const data={ad,birim:document.getElementById('urunBirim').value,aciklama:document.getElementById('urunAciklama').value,stok};
   const editId=document.getElementById('urunEditId').value;
   try{
     if(editId){await updateDoc(doc(db,'urunler',editId),data);showToast('✅ Güncellendi');}
@@ -689,7 +773,7 @@ window.checkLogin=function(){
 };
 
 function initApp(){
-  onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();});
+  onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();if(STATE.activePage==='urunler')renderUrunler();});
   onSnapshot(collection(db,'musteriler'),snap=>{STATE.musteriler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='musteriler')renderMusteriler();});
   onSnapshot(collection(db,'urunler'),snap=>{STATE.urunler=snap.docs.map(d=>({id:d.id,...d.data()}));if(STATE.activePage==='urunler')renderUrunler();});
   document.getElementById('todayDate').textContent=TODAY.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[TODAY.getMonth()]+' '+TODAY.getFullYear();
