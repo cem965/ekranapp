@@ -96,12 +96,17 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <div class="section-title">Bilgi Ekranı</div>
   <div class="section-sub" id="todayDate">—</div>
   <div class="stat-grid">
-    <div class="stat-card"><div class="stat-val" id="dSiparis">0</div><div class="stat-lbl">Aktif Sipariş</div></div>
-    <div class="stat-card"><div class="stat-val" id="dCiro" style="font-size:28px;color:var(--accent)">0</div><div class="stat-lbl" id="dCiroLbl">7 GÜNDE KURULUM</div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="dashDetay('tumSiparisler')">
+      <div class="stat-val" id="dSiparis">0</div><div class="stat-lbl">Aktif Sipariş</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="dashDetay('yediGun')">
+      <div class="stat-val" id="dCiro" style="font-size:28px;color:var(--accent)">0</div>
+      <div class="stat-lbl">7 GÜNDE KURULUM</div>
+    </div>
     <div class="stat-card"><div class="stat-val" id="dFuar">0</div><div class="stat-lbl">Aktif Fuar</div></div>
-    <div class="stat-card" style="cursor:pointer" onclick="showPage('siparisler',document.querySelector('.tab-btn:nth-child(3)'))">
+    <div class="stat-card" style="cursor:pointer" onclick="dashDetay('onayliFuarlar')">
       <div class="stat-val" id="dMusteri" style="font-size:13px;line-height:1.4">—</div>
-      <div class="stat-lbl">Yakın Fuarlar</div>
+      <div class="stat-lbl">Onaylı Fuarlar</div>
     </div>
   </div>
   <div id="kurulumBanner"></div>
@@ -110,6 +115,15 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <div class="divider"></div>
   <div style="margin-bottom:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px">Son Siparişler</div>
   <div id="dashSiparisler"></div>
+</div>
+
+<!-- DASH DETAY MODAL -->
+<div class="modal-overlay" id="dashDetayModal" onclick="closeModal('dashDetayModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dashDetayTitle"></div>
+    <div id="dashDetayContent"></div>
+  </div>
 </div>
 
 <!-- FUARLAR -->
@@ -428,18 +442,14 @@ function updateDashboard(){
   document.getElementById('dCiro').textContent=yakinSip7;
   document.getElementById('dCiro').style.color=yakinSip7>0?'var(--yellow)':'#fff';
 
-  // Yakın 2 fuardaki onaylı müşteriler
-  const yakin2=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate).slice(0,2);
+  // Sağ alt: onaylı siparişi olan gelecek fuarlar
+  const onayliFuarIds=[...new Set(STATE.siparisler.filter(s=>s.durum==='onaylandi').map(s=>s.fuarId))];
+  const onayliFuarlar=FUARLAR.filter(f=>onayliFuarIds.includes(f.id)&&f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
   const musteriEl=document.getElementById('dMusteri');
-  const onayliSiplar=STATE.siparisler.filter(s=>
-    s.durum==='onaylandi'&&yakin2.some(f=>f.id===s.fuarId)
-  );
-  if(onayliSiplar.length){
-    const firmaSet=new Set(onayliSiplar.map(s=>{
-      const m=STATE.musteriler.find(x=>x.id===s.musteriId);
-      return m?.firma||'—';
-    }));
-    musteriEl.innerHTML=[...firmaSet].map(f=>`<div style="font-size:11px;font-weight:600;color:var(--green)">${f}</div>`).join('');
+  if(onayliFuarlar.length){
+    musteriEl.innerHTML=onayliFuarlar.slice(0,3).map(f=>
+      `<div style="font-size:11px;font-weight:600;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">✅ ${f.name.split('–')[0].trim().substring(0,22)}</div>`
+    ).join('');
   } else {
     musteriEl.innerHTML='<div style="font-size:12px;color:var(--muted)">Onaylı yok</div>';
   }
@@ -892,6 +902,50 @@ window.renderStokTakip=function(){
   }).join('');
 };
 
+
+window.dashDetay=function(tip){
+  const title=document.getElementById('dashDetayTitle');
+  const content=document.getElementById('dashDetayContent');
+
+  if(tip==='tumSiparisler'){
+    title.textContent='📺 Aktif Siparişler';
+    const list=STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade');
+    content.innerHTML=list.length?list.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-text">Aktif sipariş yok</div></div>`;
+  }
+  else if(tip==='yediGun'){
+    title.textContent='⚡ 7 Günde Kurulacaklar';
+    const yedi=new Date(TODAY); yedi.setDate(yedi.getDate()+7);
+    const yakinFuarlar=FUARLAR.filter(f=>f.startDate>=TODAY&&f.startDate<=yedi);
+    const list=STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade'&&yakinFuarlar.some(f=>f.id===s.fuarId));
+    content.innerHTML=list.length?list.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">7 gün içinde kurulum yok</div></div>`;
+  }
+  else if(tip==='onayliFuarlar'){
+    title.textContent='✅ Onaylı Fuarlar';
+    const onayliFuarIds=[...new Set(STATE.siparisler.filter(s=>s.durum==='onaylandi').map(s=>s.fuarId))];
+    const fuarlar=FUARLAR.filter(f=>onayliFuarIds.includes(f.id)&&f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+    if(!fuarlar.length){
+      content.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Onaylı fuar yok</div></div>`;
+    } else {
+      content.innerHTML=fuarlar.map(f=>{
+        const siplar=STATE.siparisler.filter(s=>s.fuarId===f.id&&s.durum==='onaylandi');
+        return `<div class="card" style="margin-bottom:10px;border-left:3px solid ${f.vColor}">
+          <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">${f.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📅 ${fmtD(f.startDate)} → ${fmtD(f.endDate)} · ${f.venue}</div>
+          ${siplar.map(s=>{
+            const m=STATE.musteriler.find(x=>x.id===s.musteriId);
+            const urunler=s.urunler||[];
+            return `<div style="background:rgba(38,222,129,0.08);border-radius:8px;padding:8px;margin-bottom:6px" onclick="closeModal('dashDetayModal');openSipDetail('${s.id}')">
+              <div style="font-size:13px;font-weight:600;color:#fff">${m?.firma||'—'}</div>
+              ${urunler.length?`<div style="font-size:11px;color:var(--accent)">📦 ${urunler.map(u=>u.ad+' ×'+u.adet).join(', ')}</div>`:''}
+              ${s.konum?`<div style="font-size:11px;color:var(--muted)">📍 ${s.konum}</div>`:''}
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('');
+    }
+  }
+  openM('dashDetayModal');
+};
 
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
 
