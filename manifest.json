@@ -1,0 +1,12 @@
+{
+  "name": "EkranApp - Ekran Kiralama",
+  "short_name": "EkranApp",
+  "start_url": "/ekranapp/",
+  "display": "standalone",
+  "background_color": "#0a0a12",
+  "theme_color": "#00c1a2",
+  "icons": [
+    { "src": "https://via.placeholder.com/192x192/00c1a2/000000?text=E", "sizes": "192x192", "type": "image/png" },
+    { "src": "https://via.placeholder.com/512x512/00c1a2/000000?text=E", "sizes": "512x512", "type": "image/png" }
+  ]
+}

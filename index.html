@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>EkranApp</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a12; --surface:#111120; --surface2:#181828;
+  --border:rgba(255,255,255,0.08); --text:#f0f0ff; --muted:#7a7a9a;
+  --accent:#00c1a2; --green:#26de81; --yellow:#f7b731; --red:#fc5c65; --blue:#0099ff;
+  --tab-h:64px; --header-h:60px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);}
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgba(10,10,18,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:50;}
+.app-logo{font-size:18px;font-weight:900;color:#fff;} .app-logo span{color:var(--accent);}
+.icon-btn{width:38px;height:38px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:rgba(10,10,18,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:50;}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--muted);font-size:9px;font-family:'Roboto',sans-serif;font-weight:500;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;}
+.tab-btn .tab-icon{font-size:20px;} .tab-btn.active{color:var(--accent);}
+.page{display:none;padding:calc(var(--header-h) + 16px) 16px 16px;min-height:100vh;}
+.page.active{display:block;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.section-title{font-size:28px;font-weight:900;color:#fff;margin-bottom:4px;}
+.section-sub{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.stat-val{font-size:32px;font-weight:900;color:#fff;margin-bottom:4px;}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-green{background:rgba(38,222,129,0.15);color:var(--green);}
+.badge-yellow{background:rgba(247,183,49,0.15);color:var(--yellow);}
+.badge-red{background:rgba(252,92,101,0.15);color:var(--red);}
+.badge-blue{background:rgba(0,153,255,0.15);color:var(--blue);}
+.badge-accent{background:rgba(0,193,162,0.15);color:var(--accent);}
+.fuar-card{border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,0.1);margin-bottom:10px;cursor:pointer;}
+.fuar-card-name{font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;}
+.fuar-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.fuar-card-date{font-size:13px;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.venue-tag{background:rgba(0,0,0,0.3);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;display:block;}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:#fff;font-family:'Roboto',sans-serif;font-size:14px;padding:12px 14px;outline:none;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);}
+.form-select{appearance:none;} .form-textarea{resize:vertical;min-height:80px;}
+.btn{padding:10px 16px;border-radius:10px;border:none;font-family:'Roboto',sans-serif;font-weight:700;cursor:pointer;font-size:13px;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+.btn-danger{background:rgba(252,92,101,0.15);border:1px solid rgba(252,92,101,0.3);color:var(--red);}
+.btn-full{width:100%;padding:14px;font-size:14px;}
+.btn-sm{padding:6px 10px;font-size:11px;}
+.fab{position:fixed;bottom:calc(var(--tab-h)+16px);right:16px;width:56px;height:56px;border-radius:18px;background:var(--accent);border:none;color:#000;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,193,162,0.4);z-index:40;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:#13131f;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:16px;}
+.chips-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none;}
+.chips-row::-webkit-scrollbar{display:none;}
+.chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;background:var(--surface2);border:1px solid var(--border);color:var(--muted);}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#000;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:48px;margin-bottom:12px;} .empty-text{font-size:14px;}
+.siparis-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;}
+#loginScreen.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<!-- ŞİFRE EKRANI -->
+<div id="loginScreen">
+  <div style="text-align:center;margin-bottom:40px">
+    <div style="font-size:26px;font-weight:900;color:#fff;margin-bottom:6px">BEYOĞLU <span style="color:var(--accent)">ELEKTRİK</span></div>
+    <div style="font-size:13px;color:var(--muted)">Ekran Kiralama Takip</div>
+  </div>
+  <div style="width:100%;max-width:320px">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Şifre</div>
+    <input type="password" id="loginInput" class="form-input" placeholder="••••••••" style="font-size:18px;padding:16px;letter-spacing:4px;margin-bottom:16px" onkeydown="if(event.key==='Enter')checkLogin()">
+    <button class="btn btn-primary btn-full" style="font-size:16px;padding:16px" onclick="checkLogin()">Giriş Yap</button>
+    <div id="loginError" style="color:var(--red);font-size:13px;text-align:center;margin-top:12px;display:none">❌ Hatalı şifre</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="app-logo">EKRAN <span>KİRALAMA</span></div>
+  <div class="header-actions">
+    <div class="icon-btn" onclick="syncStatus()">☁️</div>
+  </div>
+</header>
+
+<!-- BİLGİ EKRANI -->
+<div class="page active" id="page-dashboard">
+  <div class="section-title">Bilgi Ekranı</div>
+  <div class="section-sub" id="todayDate">—</div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-val" id="dSiparis">0</div><div class="stat-lbl">Aktif Sipariş</div></div>
+    <div class="stat-card"><div class="stat-val" id="dCiro" style="font-size:20px">—</div><div class="stat-lbl" id="dCiroLbl">🔨 Kuruluma Kalan</div></div>
+    <div class="stat-card"><div class="stat-val" id="dFuar">0</div><div class="stat-lbl">Aktif Fuar</div></div>
+    <div class="stat-card"><div class="stat-val" id="dMusteri">0</div><div class="stat-lbl">Müşteri</div></div>
+  </div>
+  <div id="kurulumBanner"></div>
+  <div style="margin-bottom:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px">Yaklaşan Fuarlar</div>
+  <div id="dashFuarlar"></div>
+  <div class="divider"></div>
+  <div style="margin-bottom:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px">Son Siparişler</div>
+  <div id="dashSiparisler"></div>
+</div>
+
+<!-- FUARLAR -->
+<div class="page" id="page-fuarlar">
+  <div class="section-title">Fuar Takvimi</div>
+  <div class="section-sub">2026 · İSTANBUL</div>
+  <div class="chips-row" id="monthChips"></div>
+  <div id="fuarList"></div>
+</div>
+
+<!-- SİPARİŞLER -->
+<div class="page" id="page-siparisler">
+  <div class="section-title">Siparişler</div>
+  <div class="section-sub" id="sipCount">0 sipariş</div>
+  <div class="chips-row" id="sipFilters">
+    <div class="chip active" onclick="setSipFilter('hepsi',this)">Tümü</div>
+    <div class="chip" onclick="setSipFilter('bekliyor',this)">Bekliyor</div>
+    <div class="chip" onclick="setSipFilter('onaylandi',this)">Onaylandı</div>
+    <div class="chip" onclick="setSipFilter('teslim',this)">Teslim</div>
+    <div class="chip" onclick="setSipFilter('iptal',this)">İptal</div>
+  </div>
+  <div id="siparisList"></div>
+</div>
+
+<!-- MÜŞTERİLER -->
+<div class="page" id="page-musteriler">
+  <div class="section-title">Müşteriler</div>
+  <div class="section-sub" id="musteriCount">0 müşteri</div>
+  <div id="musteriList"></div>
+</div>
+
+<!-- TAB BAR -->
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="showPage('dashboard',this)"><span class="tab-icon">📊</span>ANA</button>
+  <button class="tab-btn" onclick="showPage('fuarlar',this)"><span class="tab-icon">📅</span>FUARLAR</button>
+  <button class="tab-btn" onclick="showPage('siparisler',this)"><span class="tab-icon">📺</span>SİPARİŞ</button>
+  <button class="tab-btn" onclick="showPage('musteriler',this)"><span class="tab-icon">👥</span>MÜŞTERİ</button>
+</nav>
+<button class="fab" id="fabBtn" onclick="openAddModal()">＋</button>
+
+<!-- SİPARİŞ MODAL -->
+<div class="modal-overlay" id="sipModal" onclick="closeModal('sipModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="sipModalTitle">Yeni Sipariş</div>
+    <input type="hidden" id="sipEditId">
+    <div class="form-group"><label class="form-label">Müşteri *</label><select class="form-select" id="sipMusteri"><option value="">— Seç —</option></select></div>
+    <div class="form-group"><label class="form-label">Fuar *</label><select class="form-select" id="sipFuar"><option value="">— Seç —</option></select></div>
+    <div class="form-group">
+      <label class="form-label">Ekran Tipi *</label>
+      <select class="form-select" id="sipEkranTipi">
+        <option value="">— Seç —</option>
+        <option value="LED Ekran">LED Ekran</option>
+        <option value="LCD Ekran">LCD Ekran</option>
+        <option value="LED + LCD">LED + LCD</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Ebat / Adet</label><input type="text" class="form-input" id="sipEbat" placeholder="örn: 3x2m / 2 adet"></div>
+    <div class="form-group"><label class="form-label">Stand / Konum</label><input type="text" class="form-input" id="sipKonum" placeholder="örn: A-124 Hall 3"></div>
+    <div class="form-group"><label class="form-label">Kurulum Ekibi</label><input type="text" class="form-input" id="sipEkip" placeholder="Ad Soyad"></div>
+    <div class="form-group"><label class="form-label">Not</label><textarea class="form-textarea" id="sipNot" placeholder="Ek bilgi..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost" onclick="closeModal('sipModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveSiparis()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- SİPARİŞ DETAY MODAL -->
+<div class="modal-overlay" id="sipDetailModal" onclick="closeModal('sipDetailModal',event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="sipDetailContent"></div></div>
+</div>
+
+<!-- MÜŞTERİ MODAL -->
+<div class="modal-overlay" id="musteriModal" onclick="closeModal('musteriModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="musteriModalTitle">Yeni Müşteri</div>
+    <input type="hidden" id="musteriEditId">
+    <div class="form-group"><label class="form-label">Firma Adı *</label><input type="text" class="form-input" id="mFirma" placeholder="Firma adı"></div>
+    <div class="form-group"><label class="form-label">Yetkili</label><input type="text" class="form-input" id="mYetkili" placeholder="Ad Soyad"></div>
+    <div class="form-group"><label class="form-label">Telefon</label><input type="tel" class="form-input" id="mTel" placeholder="05xx xxx xx xx"></div>
+    <div class="form-group"><label class="form-label">E-posta</label><input type="email" class="form-input" id="mEmail" placeholder="ornek@firma.com"></div>
+    <div class="form-group"><label class="form-label">Not</label><textarea class="form-textarea" id="mNot" placeholder="Ek bilgi..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost" onclick="closeModal('musteriModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveMusteri()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- FUAR DETAY MODAL -->
+<div class="modal-overlay" id="fuarDetailModal" onclick="closeModal('fuarDetailModal',event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="fuarDetailContent"></div></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:calc(var(--tab-h)+16px);left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,50,0.95);border:1px solid var(--border);color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;z-index:200;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyCX1BuLPLsHEDoy32pBLUu8V_TQHJ1vf5g",
+  authDomain:"ekran-kiralama.firebaseapp.com",
+  projectId:"ekran-kiralama",
+  storageBucket:"ekran-kiralama.firebasestorage.app",
+  messagingSenderId:"454573951189",
+  appId:"1:454573951189:web:54c49d7c8ca11ebbdb3a5c"
+});
+const db = getFirestore(app);
+
+const FUARLAR = [
+  {id:'f1',name:'Avrasya Motosiklet Fuarı',venue:'CNR',startDate:new Date(2026,3,16),endDate:new Date(2026,3,19),vColor:'#e74c3c'},
+  {id:'f2',name:'Motobike Istanbul',venue:'İFM',startDate:new Date(2026,3,22),endDate:new Date(2026,3,25),vColor:'#3498db'},
+  {id:'f3',name:'Ekspomed Eurasia',venue:'TÜYAP',startDate:new Date(2026,3,15),endDate:new Date(2026,3,18),vColor:'#9b59b6'},
+  {id:'f4',name:'IDEX İstanbul',venue:'İFM',startDate:new Date(2026,3,15),endDate:new Date(2026,3,18),vColor:'#1abc9c'},
+  {id:'f5',name:'Franchise İstanbul Expo',venue:'TÜYAP',startDate:new Date(2026,3,16),endDate:new Date(2026,3,19),vColor:'#e67e22'},
+  {id:'f6',name:'Eurobike Istanbul',venue:'İFM',startDate:new Date(2026,3,22),endDate:new Date(2026,3,25),vColor:'#2ecc71'},
+  {id:'f7',name:'SAHA Expo – Savunma & Havacılık',venue:'İFM',startDate:new Date(2026,4,5),endDate:new Date(2026,4,9),vColor:'#c0392b'},
+  {id:'f8',name:'Hostex Istanbul',venue:'CNR',startDate:new Date(2026,4,6),endDate:new Date(2026,4,9),vColor:'#8e44ad'},
+  {id:'f9',name:'Yemek Fuarı İstanbul',venue:'TÜYAP',startDate:new Date(2026,4,13),endDate:new Date(2026,4,16),vColor:'#f39c12'},
+  {id:'f10',name:'Autoshow İstanbul',venue:'CNR',startDate:new Date(2026,4,20),endDate:new Date(2026,4,24),vColor:'#2980b9'},
+  {id:'f11',name:'Buildex İstanbul',venue:'TÜYAP',startDate:new Date(2026,4,27),endDate:new Date(2026,4,30),vColor:'#7f8c8d'},
+  {id:'f12',name:'Teknoloji & Yazılım Fuarı',venue:'İFM',startDate:new Date(2026,5,3),endDate:new Date(2026,5,6),vColor:'#00bcd4'},
+  {id:'f13',name:'Cosmoprof İstanbul',venue:'CNR',startDate:new Date(2026,5,10),endDate:new Date(2026,5,13),vColor:'#e91e63'},
+  {id:'f14',name:'Houseware İstanbul',venue:'TÜYAP',startDate:new Date(2026,5,17),endDate:new Date(2026,5,20),vColor:'#ff9800'},
+  {id:'f15',name:'Turkeybuild İstanbul',venue:'CNR',startDate:new Date(2026,5,24),endDate:new Date(2026,5,27),vColor:'#795548'},
+  {id:'f16',name:'Food & Drink Expo',venue:'İFM',startDate:new Date(2026,6,1),endDate:new Date(2026,6,4),vColor:'#4caf50'},
+  {id:'f17',name:'İstanbul Jewelry Show',venue:'CNR',startDate:new Date(2026,6,8),endDate:new Date(2026,6,11),vColor:'#ffd700'},
+  {id:'f18',name:'Medicana Health Fair',venue:'İFM',startDate:new Date(2026,6,15),endDate:new Date(2026,6,18),vColor:'#00acc1'},
+  {id:'f19',name:'Automechanika İstanbul',venue:'TÜYAP',startDate:new Date(2026,6,22),endDate:new Date(2026,6,25),vColor:'#f44336'},
+  {id:'f20',name:'Tekstil & Moda Fuarı',venue:'CNR',startDate:new Date(2026,7,5),endDate:new Date(2026,7,8),vColor:'#9c27b0'},
+];
+FUARLAR.forEach(f=>{f.monthName=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][f.startDate.getMonth()];});
+
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+const STATE={activePage:'dashboard',siparisler:[],musteriler:[],fuarMonthFilter:'Tümü',sipFilter:'hepsi'};
+
+function fmtD(d){return d.getDate()+'.'+(d.getMonth()+1).toString().padStart(2,'0');}
+function fuarStatus(f){if(f.endDate<TODAY)return 'past';if(f.startDate<=TODAY)return 'active';return 'upcoming';}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2500);}
+
+window.showPage=function(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  STATE.activePage=page;
+  updateFab();
+  if(page==='siparisler')renderSiparisler();
+  if(page==='musteriler')renderMusteriler();
+  if(page==='fuarlar')renderFuarlar();
+};
+
+function updateFab(){
+  const fab=document.getElementById('fabBtn');
+  if(STATE.activePage==='dashboard'||STATE.activePage==='fuarlar'){fab.style.display='none';return;}
+  fab.style.display='flex';
+}
+
+window.openAddModal=function(){
+  if(STATE.activePage==='siparisler')openSipModal();
+  if(STATE.activePage==='musteriler')openMusteriModal();
+};
+
+window.closeModal=function(id,e){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');};
+function openM(id){document.getElementById(id).classList.add('open');}
+
+function updateDashboard(){
+  document.getElementById('dSiparis').textContent=STATE.siparisler.filter(s=>s.durum!=='iptal').length;
+  document.getElementById('dFuar').textContent=FUARLAR.filter(f=>fuarStatus(f)==='active').length;
+  document.getElementById('dMusteri').textContent=STATE.musteriler.length;
+
+  const yakinFuar=FUARLAR.filter(f=>f.startDate>=TODAY).sort((a,b)=>a.startDate-b.startDate)[0];
+  const banner=document.getElementById('kurulumBanner');
+  if(yakinFuar){
+    const kt=new Date(yakinFuar.startDate); kt.setDate(kt.getDate()-3);
+    const kg=Math.ceil((kt-TODAY)/86400000);
+    const el=document.getElementById('dCiro');
+    if(kg<=0){el.textContent='Bugün!';el.style.color='var(--red)';}
+    else if(kg<=3){el.textContent=kg+' gün';el.style.color='var(--red)';}
+    else if(kg<=7){el.textContent=kg+' gün';el.style.color='var(--yellow)';}
+    else{el.textContent=kg+' gün';el.style.color='#fff';}
+    if(kg<=7&&banner){
+      const bc=kg<=3?'rgba(252,92,101,0.1)':'rgba(247,183,49,0.1)';
+      const brd=kg<=3?'var(--red)':'var(--yellow)';
+      banner.innerHTML=`<div style="background:${bc};border:1px solid ${brd};border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#fff">🔨 <b>${kg<=0?'Bugün':kg+' gün sonra'} kurulum</b> → ${yakinFuar.name.split('–')[0].trim()}<div style="font-size:11px;color:var(--muted);margin-top:4px">Fuar: ${fmtD(yakinFuar.startDate)} · Kurulum: ${fmtD(kt)}</div></div>`;
+    } else if(banner) banner.innerHTML='';
+  }
+
+  const df=document.getElementById('dashFuarlar');
+  df.innerHTML=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate).slice(0,3).map(f=>{
+    const st=fuarStatus(f);
+    const sc=STATE.siparisler.filter(s=>s.fuarId===f.id&&s.durum!=='iptal').length;
+    const bg=`background:linear-gradient(135deg,${f.vColor}44 0%,${f.vColor}22 100%);border-color:${f.vColor}66`;
+    return `<div class="fuar-card" style="${bg}" onclick="openFuarDetail('${f.id}')">
+      <div class="fuar-card-header"><div class="fuar-card-name">${f.name}</div>${st==='active'?'<span class="badge badge-green">🟢 FUAR AÇIK</span>':'<span class="badge" style="background:rgba(0,0,0,0.3);color:#fff">'+Math.ceil((f.startDate-TODAY)/86400000)+' gün sonra</span>'}</div>
+      <div class="fuar-card-date"><span>${fmtD(f.startDate)} → ${fmtD(f.endDate)}</span><span class="venue-tag">${f.venue}</span>${sc>0?`<span class="badge badge-accent">📺 ${sc} sipariş</span>`:''}</div>
+    </div>`;
+  }).join('');
+
+  const ds=document.getElementById('dashSiparisler');
+  const son=[...STATE.siparisler].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,3);
+  ds.innerHTML=son.length?son.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-text">Henüz sipariş yok</div></div>`;
+}
+
+window.renderFuarlar=function(){
+  const months=['Tümü','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  document.getElementById('monthChips').innerHTML=months.map(m=>`<div class="chip ${STATE.fuarMonthFilter===m?'active':''}" onclick="setFuarMonth('${m}')">${m}</div>`).join('');
+  let list=FUARLAR;
+  if(STATE.fuarMonthFilter!=='Tümü')list=list.filter(f=>f.monthName===STATE.fuarMonthFilter);
+  document.getElementById('fuarList').innerHTML=list.map(f=>{
+    const st=fuarStatus(f);
+    const bg=st==='past'?'background:rgba(30,30,50,0.8);border-color:rgba(255,255,255,0.06)':`background:linear-gradient(135deg,${f.vColor}55 0%,${f.vColor}22 100%);border-color:${f.vColor}66`;
+    const sc=STATE.siparisler.filter(s=>s.fuarId===f.id).length;
+    return `<div class="fuar-card ${st}-fuar" style="${bg}" onclick="openFuarDetail('${f.id}')">
+      <div class="fuar-card-header"><div class="fuar-card-name">${f.name}</div>${st==='active'?'<span class="badge badge-green">🟢 FUAR AÇIK</span>':st==='upcoming'?`<span class="badge" style="background:rgba(0,0,0,0.3);color:#fff">${Math.ceil((f.startDate-TODAY)/86400000)} gün sonra</span>`:'<span class="badge" style="background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.4)">Geçti</span>'}</div>
+      <div class="fuar-card-date"><span>${fmtD(f.startDate)} → ${fmtD(f.endDate)}</span><span class="venue-tag">${f.venue}</span></div>
+      ${sc>0?`<div style="margin-top:8px"><span class="badge badge-accent">📺 ${sc} sipariş</span></div>`:''}
+      ${st==='active'?`<div style="margin-top:8px;font-size:12px;color:#ffcccc;font-weight:700">⏳ Söküme ${Math.ceil((f.endDate-TODAY)/86400000)} gün kaldı</div>`:''}
+    </div>`;
+  }).join('');
+};
+
+window.setFuarMonth=function(m){STATE.fuarMonthFilter=m;renderFuarlar();};
+
+window.openFuarDetail=function(fid){
+  const f=FUARLAR.find(x=>x.id===fid); if(!f)return;
+  const fuarSip=STATE.siparisler.filter(s=>s.fuarId===fid);
+  const st=fuarStatus(f);
+  document.getElementById('fuarDetailContent').innerHTML=`
+    <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:4px">${f.name}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${fmtD(f.startDate)}–${fmtD(f.endDate)} · ${f.venue}</div>
+    <div class="divider"></div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Siparişler (${fuarSip.length})</div>
+    ${fuarSip.length?fuarSip.map(s=>sipCard(s)).join(''):`<div class="empty-state" style="padding:20px"><div class="empty-icon">📺</div><div class="empty-text">Bu fuara ait sipariş yok</div></div>`}
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="closeModal('fuarDetailModal');openSipModal('${fid}')">+ Yeni Sipariş</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeModal('fuarDetailModal')">Kapat</button>`;
+  openM('fuarDetailModal');
+};
+
+function sipCard(s){
+  const m=STATE.musteriler.find(x=>x.id===s.musteriId);
+  const f=FUARLAR.find(x=>x.id===s.fuarId);
+  const durumBadge={bekliyor:'<span class="badge badge-yellow">⏳ Bekliyor</span>',onaylandi:'<span class="badge badge-green">✅ Onaylandı</span>',iptal:'<span class="badge badge-red">❌ İptal</span>',teslim:'<span class="badge badge-blue">📦 Teslim</span>'};
+  return `<div class="siparis-card" onclick="openSipDetail('${s.id}')">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:700;color:#fff">${m?.firma||'—'}</div>${durumBadge[s.durum]||''}
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">📺 ${s.ekranTipi||'—'}${s.ebat?' · '+s.ebat:''}</div>
+    <div style="font-size:11px;color:var(--muted)">📅 ${f?.name||'—'}${s.konum?' · 📍'+s.konum:''}</div>
+  </div>`;
+}
+
+window.renderSiparisler=function(){
+  let list=STATE.siparisler;
+  if(STATE.sipFilter!=='hepsi')list=list.filter(s=>s.durum===STATE.sipFilter);
+  document.getElementById('sipCount').textContent=list.length+' sipariş';
+  document.getElementById('siparisList').innerHTML=list.length?list.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-text">Sipariş bulunamadı</div></div>`;
+};
+
+window.setSipFilter=function(v,btn){
+  STATE.sipFilter=v;
+  document.querySelectorAll('#sipFilters .chip').forEach(c=>c.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderSiparisler();
+};
+
+window.openSipModal=function(prefuarId=null){
+  document.getElementById('sipEditId').value='';
+  document.getElementById('sipModalTitle').textContent='Yeni Sipariş';
+  ['sipEbat','sipKonum','sipEkip','sipNot'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sipMusteri').innerHTML='<option value="">— Müşteri Seç —</option>'+STATE.musteriler.map(m=>`<option value="${m.id}">${m.firma}</option>`).join('');
+  const fuarlar=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+  document.getElementById('sipFuar').innerHTML='<option value="">— Fuar Seç —</option>'+fuarlar.map(f=>`<option value="${f.id}" ${f.id===prefuarId?'selected':''}>${f.name} (${fmtD(f.startDate)})</option>`).join('');
+  document.getElementById('sipEkranTipi').value='';
+  openM('sipModal');
+};
+
+window.saveSiparis=async function(){
+  const musteriId=document.getElementById('sipMusteri').value;
+  const fuarId=document.getElementById('sipFuar').value;
+  const ekranTipi=document.getElementById('sipEkranTipi').value;
+  if(!musteriId){showToast('⚠️ Müşteri seçin');return;}
+  if(!fuarId){showToast('⚠️ Fuar seçin');return;}
+  if(!ekranTipi){showToast('⚠️ Ekran tipi seçin');return;}
+  const data={musteriId,fuarId,ekranTipi,ebat:document.getElementById('sipEbat').value,konum:document.getElementById('sipKonum').value,ekip:document.getElementById('sipEkip').value,not:document.getElementById('sipNot').value,durum:'bekliyor'};
+  const editId=document.getElementById('sipEditId').value;
+  try{
+    if(editId){await updateDoc(doc(db,'siparisler',editId),data);showToast('✅ Güncellendi');}
+    else{data.createdAt=serverTimestamp();await addDoc(collection(db,'siparisler'),data);showToast('✅ Sipariş eklendi');}
+    closeModal('sipModal');
+  }catch(err){showToast('❌ '+err.message);}
+};
+
+window.openSipDetail=function(sid){
+  const s=STATE.siparisler.find(x=>x.id===sid); if(!s)return;
+  const m=STATE.musteriler.find(x=>x.id===s.musteriId);
+  const f=FUARLAR.find(x=>x.id===s.fuarId);
+  document.getElementById('sipDetailContent').innerHTML=`
+    <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px">${m?.firma||'—'}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">📅 ${f?.name||'—'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">EKRAN TİPİ</div><div style="font-size:13px;color:#fff;font-weight:600">📺 ${s.ekranTipi||'—'}</div></div>
+      ${s.ebat?`<div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">EBAT/ADET</div><div style="font-size:13px;color:#fff">${s.ebat}</div></div>`:''}
+      ${s.konum?`<div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">KONUM</div><div style="font-size:13px;color:#fff">📍 ${s.konum}</div></div>`:''}
+      ${s.ekip?`<div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">KURULUM EKİBİ</div><div style="font-size:13px;color:#fff">🔧 ${s.ekip}</div></div>`:''}
+    </div>
+    ${s.not?`<div class="card" style="margin-bottom:16px"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">NOT</div><div style="font-size:13px;color:#fff">${s.not}</div></div>`:''}
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Durum</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">
+      ${['bekliyor','onaylandi','teslim','iptal'].map(d=>`<button class="btn ${s.durum===d?'btn-primary':'btn-ghost'} btn-sm" onclick="updateSipDurum('${sid}','${d}')">${{bekliyor:'⏳ Bekliyor',onaylandi:'✅ Onaylandı',teslim:'📦 Teslim',iptal:'❌ İptal'}[d]}</button>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="editSiparis('${sid}')">✏️ Düzenle</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteSiparis('${sid}')">🗑️ Sil</button>
+    </div>`;
+  openM('sipDetailModal');
+};
+
+window.updateSipDurum=async function(sid,durum){await updateDoc(doc(db,'siparisler',sid),{durum});showToast('✅ Durum güncellendi');closeModal('sipDetailModal');};
+window.editSiparis=function(sid){const s=STATE.siparisler.find(x=>x.id===sid);if(!s)return;closeModal('sipDetailModal');openSipModal(s.fuarId);setTimeout(()=>{document.getElementById('sipEditId').value=sid;document.getElementById('sipModalTitle').textContent='Sipariş Düzenle';document.getElementById('sipMusteri').value=s.musteriId||'';document.getElementById('sipFuar').value=s.fuarId||'';document.getElementById('sipEkranTipi').value=s.ekranTipi||'';document.getElementById('sipEbat').value=s.ebat||'';document.getElementById('sipKonum').value=s.konum||'';document.getElementById('sipEkip').value=s.ekip||'';document.getElementById('sipNot').value=s.not||'';},100);};
+window.deleteSiparis=async function(sid){if(!confirm('Sipariş silinsin mi?'))return;await deleteDoc(doc(db,'siparisler',sid));showToast('🗑️ Silindi');closeModal('sipDetailModal');};
+
+window.renderMusteriler=function(){
+  document.getElementById('musteriCount').textContent=STATE.musteriler.length+' müşteri';
+  document.getElementById('musteriList').innerHTML=STATE.musteriler.length?STATE.musteriler.map(m=>{
+    const sc=STATE.siparisler.filter(s=>s.musteriId===m.id).length;
+    return `<div class="card" style="cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:15px;font-weight:700;color:#fff">${m.firma}</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${sc>0?`<span class="badge badge-accent">📺 ${sc}</span>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="openMusteriModal('${m.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMusteri('${m.id}')">🗑️</button>
+        </div>
+      </div>
+      ${m.yetkili?`<div style="font-size:12px;color:var(--muted)">👤 ${m.yetkili}</div>`:''}
+      ${m.tel?`<div style="font-size:12px;color:var(--muted)">📞 ${m.tel}</div>`:''}
+    </div>`;
+  }).join(''):`<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">Henüz müşteri yok</div></div>`;
+};
+
+window.openMusteriModal=function(mid=null){
+  ['mFirma','mYetkili','mTel','mEmail','mNot'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('musteriEditId').value='';
+  document.getElementById('musteriModalTitle').textContent='Yeni Müşteri';
+  if(mid){const m=STATE.musteriler.find(x=>x.id===mid);if(m){document.getElementById('musteriEditId').value=mid;document.getElementById('musteriModalTitle').textContent='Müşteri Düzenle';document.getElementById('mFirma').value=m.firma||'';document.getElementById('mYetkili').value=m.yetkili||'';document.getElementById('mTel').value=m.tel||'';document.getElementById('mEmail').value=m.email||'';document.getElementById('mNot').value=m.not||'';}}
+  openM('musteriModal');
+};
+
+window.saveMusteri=async function(){
+  const firma=document.getElementById('mFirma').value.trim();
+  if(!firma){showToast('⚠️ Firma adı girin');return;}
+  const data={firma,yetkili:document.getElementById('mYetkili').value,tel:document.getElementById('mTel').value,email:document.getElementById('mEmail').value,not:document.getElementById('mNot').value};
+  const editId=document.getElementById('musteriEditId').value;
+  try{
+    if(editId){await updateDoc(doc(db,'musteriler',editId),data);showToast('✅ Güncellendi');}
+    else{data.createdAt=serverTimestamp();await addDoc(collection(db,'musteriler'),data);showToast('✅ Müşteri eklendi');}
+    closeModal('musteriModal');
+  }catch(err){showToast('❌ '+err.message);}
+};
+
+window.deleteMusteri=async function(mid){if(!confirm('Müşteri silinsin mi?'))return;await deleteDoc(doc(db,'musteriler',mid));showToast('🗑️ Silindi');};
+window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
+
+// ŞİFRE
+window.checkLogin=function(){
+  if(document.getElementById('loginInput').value==='beyoglu2026'){
+    localStorage.setItem('ekranapp_auth','1');
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loginError').style.display='none';
+    initApp();
+  }else{document.getElementById('loginError').style.display='block';document.getElementById('loginInput').value='';}
+};
+
+function initApp(){
+  onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();});
+  onSnapshot(collection(db,'musteriler'),snap=>{STATE.musteriler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='musteriler')renderMusteriler();});
+  document.getElementById('todayDate').textContent=TODAY.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[TODAY.getMonth()]+' '+TODAY.getFullYear();
+  renderFuarlar(); updateDashboard(); updateFab();
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
+}
+
+if(localStorage.getItem('ekranapp_auth')==='1'){document.getElementById('loginScreen').classList.add('hidden');initApp();}
+else{setTimeout(()=>document.getElementById('loginInput')?.focus(),300);}
+</script>
+</body>
+</html>
