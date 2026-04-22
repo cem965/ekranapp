@@ -88,7 +88,11 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 
 <header class="app-header">
   <div class="app-logo">EKRAN <span>KİRALAMA</span></div>
-  <div class="header-actions"><div class="icon-btn" onclick="syncStatus()">☁️</div></div>
+  <div class="header-actions" style="gap:6px">
+    <div class="icon-btn" onclick="exportExcel()" title="Excel'e Aktar">📊</div>
+    <div class="icon-btn" onclick="exportPDF()" title="PDF'e Aktar">📄</div>
+    <div class="icon-btn" onclick="syncStatus()">☁️</div>
+  </div>
 </header>
 
 <!-- BİLGİ EKRANI -->
@@ -1173,6 +1177,100 @@ window.rezerveDetay=function(urunId, fuarId){
     }).join('')}
   `;
   openM('rezerveDetayModal');
+};
+
+window.exportExcel=function(){
+  const onaylilar=STATE.siparisler.filter(s=>s.durum==='onaylandi');
+  if(!onaylilar.length){showToast('⚠️ Onaylı sipariş yok');return;}
+
+  // CSV oluştur (Excel'de açılır)
+  const satirlar=[
+    ['Müşteri','Fuar','Fuar Tarihi','Mekan','Ürünler','Konum','Kurulum Ekibi','Not']
+  ];
+  onaylilar.forEach(s=>{
+    const m=STATE.musteriler.find(x=>x.id===s.musteriId);
+    const f=FUARLAR.find(x=>x.id===s.fuarId);
+    satirlar.push([
+      m?.firma||'—',
+      f?.name||'—',
+      f?`${fmtD(f.startDate)}-${fmtD(f.endDate)}`:'—',
+      f?.venue||'—',
+      (s.urunler||[]).map(u=>u.ad+' x'+u.adet).join(' | '),
+      s.konum||'',
+      s.ekip||'',
+      s.not||''
+    ]);
+  });
+
+  const csv='\uFEFF'+satirlar.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`OnayliSiparisler_${new Date().toLocaleDateString('tr-TR').replace(/\./g,'-')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('✅ Excel dosyası indirildi');
+};
+
+window.exportPDF=function(){
+  const onaylilar=STATE.siparisler.filter(s=>s.durum==='onaylandi');
+  if(!onaylilar.length){showToast('⚠️ Onaylı sipariş yok');return;}
+
+  // Fuar bazında grupla
+  const grouped={};
+  onaylilar.forEach(s=>{
+    if(!grouped[s.fuarId]) grouped[s.fuarId]=[];
+    grouped[s.fuarId].push(s);
+  });
+
+  const tarih=new Date().toLocaleDateString('tr-TR');
+  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Onaylı Siparişler</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;color:#000;padding:20px;}
+    h1{font-size:18px;margin-bottom:4px;}
+    .tarih{color:#666;font-size:11px;margin-bottom:20px;}
+    .fuar{margin-bottom:24px;}
+    .fuar-baslik{background:#0a0a12;color:#fff;padding:8px 12px;font-size:14px;font-weight:bold;border-radius:4px;margin-bottom:8px;}
+    .fuar-tarih{font-size:11px;color:#aaa;margin-top:2px;}
+    table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+    th{background:#f0f0f0;padding:6px 8px;text-align:left;font-size:11px;border:1px solid #ddd;}
+    td{padding:6px 8px;border:1px solid #ddd;font-size:11px;vertical-align:top;}
+    tr:nth-child(even){background:#fafafa;}
+    .badge{background:#00c1a2;color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;}
+  </style></head><body>
+  <h1>📺 EKRAN KİRALAMA — Onaylı Siparişler</h1>
+  <div class="tarih">Oluşturulma: ${tarih} · Toplam: ${onaylilar.length} sipariş</div>`;
+
+  Object.entries(grouped).forEach(([fid,siplar])=>{
+    const f=FUARLAR.find(x=>x.id===fid);
+    html+=`<div class="fuar">
+      <div class="fuar-baslik">${f?.name||'—'} <span class="badge">✅ ${siplar.length} sipariş</span>
+        <div class="fuar-tarih">${f?fmtD(f.startDate)+' → '+fmtD(f.endDate)+' · '+f.venue:''}</div>
+      </div>
+      <table>
+        <tr><th>Müşteri</th><th>Ürünler</th><th>Konum</th><th>Kurulum Ekibi</th><th>Not</th></tr>
+        ${siplar.map(s=>{
+          const m=STATE.musteriler.find(x=>x.id===s.musteriId);
+          return `<tr>
+            <td><b>${m?.firma||'—'}</b>${m?.yetkili?'<br><span style="color:#666">'+m.yetkili+'</span>':''}</td>
+            <td>${(s.urunler||[]).map(u=>`<b>${u.ad}</b> ×${u.adet}`).join('<br>')}</td>
+            <td>${s.konum||'—'}</td>
+            <td>${s.ekip||'—'}</td>
+            <td>${s.not||'—'}</td>
+          </tr>`;
+        }).join('')}
+      </table>
+    </div>`;
+  });
+
+  html+='</body></html>';
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>win.print(),600);
+  showToast('📄 PDF ekranı açıldı — Yazdır/Kaydet');
 };
 
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
