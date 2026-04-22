@@ -911,6 +911,11 @@ window.stokKaydet=async function(){
 window.deleteUrun=async function(uid){if(!confirm('Ürün silinsin mi?'))return;await deleteDoc(doc(db,'urunler',uid));showToast('🗑️ Silindi');};
 
 
+window.toggleRezv=function(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+};
+
 window.renderStokTakip=function(){
   const tumGelecekFuarlar=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
 
@@ -991,7 +996,7 @@ window.renderStokTakip=function(){
           <div style="flex:1;font-size:13px;color:#fff;font-weight:500">📦 ${u.ad}</div>
           <div style="display:flex;gap:10px">
             <div style="text-align:center;min-width:44px;cursor:${rez>0?'pointer':'default'}"
-              ${rez>0?`onclick="this.parentElement.parentElement.querySelector('.rezv-detay').style.display=this.parentElement.parentElement.querySelector('.rezv-detay').style.display==='none'?'block':'none'"`:''}>
+              ${rez>0?`onclick="toggleRezv('rezv_${f.id}_${u.id}')"`:''}>
               <div style="font-size:16px;font-weight:800;color:${rez>0?(cakisanRez>0?'var(--red)':'var(--yellow)'):'var(--muted)'}">
                 ${rez}${cakisanRez>0?'⚠️':''}
               </div>
@@ -1007,7 +1012,7 @@ window.renderStokTakip=function(){
             </div>
           </div>
         </div>
-        ${rez>0?`<div class="rezv-detay" style="display:none;background:var(--surface2);border-radius:10px;padding:8px;margin-top:6px">${detayHtml}</div>`:''}
+        ${rez>0?`<div id="rezv_${f.id}_${u.id}" style="display:none;background:var(--surface2);border-radius:10px;padding:8px;margin-top:6px">${detayHtml}</div>`:''}
       </div>`;
     }).join('');
 
