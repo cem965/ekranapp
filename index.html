@@ -246,6 +246,24 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   </div>
 </div>
 
+<!-- STOK GÜNCELLE MODAL -->
+<div class="modal-overlay" id="stokModal" onclick="closeModal('stokModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📦 Stok Güncelle</div>
+    <input type="hidden" id="stokUrunId">
+    <div id="stokUrunAdi" style="font-size:14px;color:var(--muted);margin-bottom:16px"></div>
+    <div class="form-group">
+      <label class="form-label">Toplam Stok Adedi *</label>
+      <input type="number" class="form-input" id="stokAdet" min="0" style="font-size:24px;padding:16px;text-align:center">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost" onclick="closeModal('stokModal')">İptal</button>
+      <button class="btn btn-primary" onclick="stokKaydet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
 <!-- HIZLI MÜŞTERİ MODAL -->
 <div class="modal-overlay" id="hizliMusteriModal" onclick="closeModal('hizliMusteriModal',event)">
   <div class="modal-sheet">
@@ -709,6 +727,7 @@ window.renderUrunler=function(){
           ${u.birim?`<div style="font-size:12px;color:var(--muted);margin-top:2px">Birim: ${u.birim}</div>`:''}
         </div>
         <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="stokGuncelle('${u.id}',${stok})">📦 Stok</button>
           <button class="btn btn-ghost btn-sm" onclick="openUrunModal('${u.id}')">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteUrun('${u.id}')">🗑️</button>
         </div>
@@ -758,6 +777,26 @@ window.saveUrun=async function(){
     closeModal('urunModal');
   }catch(err){showToast('❌ '+err.message);}
 };
+window.stokGuncelle=function(uid, mevcutStok){
+  const u=STATE.urunler.find(x=>x.id===uid); if(!u)return;
+  document.getElementById('stokUrunId').value=uid;
+  document.getElementById('stokUrunAdi').textContent='📦 '+u.ad;
+  document.getElementById('stokAdet').value=mevcutStok||0;
+  openM('stokModal');
+  setTimeout(()=>document.getElementById('stokAdet').select(),300);
+};
+
+window.stokKaydet=async function(){
+  const uid=document.getElementById('stokUrunId').value;
+  const stok=parseInt(document.getElementById('stokAdet').value);
+  if(isNaN(stok)||stok<0){showToast('⚠️ Geçerli bir sayı girin');return;}
+  try{
+    await updateDoc(doc(db,'urunler',uid),{stok});
+    showToast('✅ Stok güncellendi');
+    closeModal('stokModal');
+  }catch(err){showToast('❌ '+err.message);}
+};
+
 window.deleteUrun=async function(uid){if(!confirm('Ürün silinsin mi?'))return;await deleteDoc(doc(db,'urunler',uid));showToast('🗑️ Silindi');};
 
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
