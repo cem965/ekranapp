@@ -968,12 +968,23 @@ window.renderStokTakip=function(){
       const detaylar=rezerveDetayMap[u.id]||[];
       const cakisanRez=detaylar.filter(d=>d.cakisan).reduce((t,d)=>t+d.adet,0);
       const detayHtml=detaylar.map(d=>`
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
-          <div>
-            <div style="color:${d.cakisan?'rgba(252,92,101,0.9)':'#fff'};font-weight:600">${d.cakisan?'⚠️ ':''} ${d.musteriAdi}</div>
-            <div style="color:var(--muted)">${d.fuarAdi} · ${d.fuarTarih}</div>
+        <div onclick="openSipDetail('${d.sipId}')" style="
+          display:flex;align-items:center;justify-content:space-between;
+          padding:8px;margin-bottom:4px;border-radius:8px;cursor:pointer;
+          background:${d.cakisan?'rgba(252,92,101,0.1)':'rgba(255,255,255,0.05)'};
+          border:1px solid ${d.cakisan?'rgba(252,92,101,0.3)':'rgba(255,255,255,0.08)'};
+        ">
+          <div style="flex:1">
+            <div style="color:${d.cakisan?'rgba(252,92,101,0.95)':'#fff'};font-weight:700;font-size:12px;margin-bottom:2px">
+              ${d.cakisan?'⚠️ ':''} ${d.musteriAdi}
+            </div>
+            <div style="color:var(--muted);font-size:11px">${d.fuarAdi}</div>
+            <div style="color:var(--muted);font-size:10px">${d.fuarTarih}</div>
           </div>
-          <div style="font-size:16px;font-weight:900;color:${d.cakisan?'var(--red)':'var(--yellow)'}">×${d.adet}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:18px;font-weight:900;color:${d.cakisan?'var(--red)':'var(--yellow)'}">×${d.adet}</div>
+            <div style="font-size:14px;color:var(--muted)">›</div>
+          </div>
         </div>`).join('');
       return `<div style="padding:8px 0;border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;justify-content:space-between">
