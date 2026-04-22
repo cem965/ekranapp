@@ -10,22 +10,16 @@
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0a0a12; --surface:#111120; --surface2:#181828;
-  --border:rgba(255,255,255,0.08); --text:#f0f0ff; --muted:#7a7a9a;
-  --accent:#00c1a2; --green:#26de81; --yellow:#f7b731; --red:#fc5c65; --blue:#0099ff;
-  --tab-h:64px; --header-h:60px;
-}
+:root{--bg:#0a0a12;--surface:#111120;--surface2:#181828;--border:rgba(255,255,255,0.08);--text:#f0f0ff;--muted:#7a7a9a;--accent:#00c1a2;--green:#26de81;--yellow:#f7b731;--red:#fc5c65;--blue:#0099ff;--tab-h:64px;--header-h:60px;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-height:100vh;padding-bottom:var(--tab-h);}
 .app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgba(10,10,18,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:50;}
-.app-logo{font-size:18px;font-weight:900;color:#fff;} .app-logo span{color:var(--accent);}
+.app-logo{font-size:18px;font-weight:900;color:#fff;}.app-logo span{color:var(--accent);}
 .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
 .tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:rgba(10,10,18,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:50;}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--muted);font-size:9px;font-family:'Roboto',sans-serif;font-weight:500;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;}
-.tab-btn .tab-icon{font-size:20px;} .tab-btn.active{color:var(--accent);}
-.page{display:none;padding:calc(var(--header-h) + 16px) 16px 16px;min-height:100vh;}
-.page.active{display:block;}
+.tab-btn .ti{font-size:20px;}.tab-btn.active{color:var(--accent);}
+.page{display:none;padding:calc(var(--header-h)+16px) 16px 16px;min-height:100vh;}.page.active{display:block;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
 .section-title{font-size:28px;font-weight:900;color:#fff;margin-bottom:4px;}
 .section-sub{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;}
@@ -48,17 +42,16 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 .form-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;display:block;}
 .form-input,.form-select,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:#fff;font-family:'Roboto',sans-serif;font-size:14px;padding:12px 14px;outline:none;}
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);}
-.form-select{appearance:none;} .form-textarea{resize:vertical;min-height:80px;}
+.form-select{appearance:none;}.form-textarea{resize:vertical;min-height:80px;}
 .btn{padding:10px 16px;border-radius:10px;border:none;font-family:'Roboto',sans-serif;font-weight:700;cursor:pointer;font-size:13px;transition:all .15s;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text);}
 .btn-danger{background:rgba(252,92,101,0.15);border:1px solid rgba(252,92,101,0.3);color:var(--red);}
-.btn-full{width:100%;padding:14px;font-size:14px;}
-.btn-sm{padding:6px 10px;font-size:11px;}
+.btn-full{width:100%;padding:14px;font-size:14px;}.btn-sm{padding:6px 10px;font-size:11px;}
 .fab{position:fixed;bottom:calc(var(--tab-h)+16px);right:16px;width:56px;height:56px;border-radius:18px;background:var(--accent);border:none;color:#000;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,193,162,0.4);z-index:40;}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
-.modal-sheet{background:#13131f;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease;}
+.modal-sheet{background:#13131f;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;animation:slideUp .25s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
 .modal-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:16px;}
@@ -68,9 +61,11 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 .chip.active{background:var(--accent);border-color:var(--accent);color:#000;}
 .divider{height:1px;background:var(--border);margin:16px 0;}
 .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
-.empty-icon{font-size:48px;margin-bottom:12px;} .empty-text{font-size:14px;}
+.empty-icon{font-size:48px;margin-bottom:12px;}.empty-text{font-size:14px;}
 .siparis-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;}
-::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+/* Ürün satırı */
+.urun-satir{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:6px;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 #loginScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;}
 #loginScreen.hidden{display:none;}
 </style>
@@ -91,12 +86,9 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   </div>
 </div>
 
-<!-- HEADER -->
 <header class="app-header">
   <div class="app-logo">EKRAN <span>KİRALAMA</span></div>
-  <div class="header-actions">
-    <div class="icon-btn" onclick="syncStatus()">☁️</div>
-  </div>
+  <div class="header-actions"><div class="icon-btn" onclick="syncStatus()">☁️</div></div>
 </header>
 
 <!-- BİLGİ EKRANI -->
@@ -146,12 +138,19 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <div id="musteriList"></div>
 </div>
 
-<!-- TAB BAR -->
+<!-- ÜRÜNLER -->
+<div class="page" id="page-urunler">
+  <div class="section-title">Ürünler</div>
+  <div class="section-sub" id="urunCount">0 ürün</div>
+  <div id="urunList"></div>
+</div>
+
 <nav class="tab-bar">
-  <button class="tab-btn active" onclick="showPage('dashboard',this)"><span class="tab-icon">📊</span>ANA</button>
-  <button class="tab-btn" onclick="showPage('fuarlar',this)"><span class="tab-icon">📅</span>FUARLAR</button>
-  <button class="tab-btn" onclick="showPage('siparisler',this)"><span class="tab-icon">📺</span>SİPARİŞ</button>
-  <button class="tab-btn" onclick="showPage('musteriler',this)"><span class="tab-icon">👥</span>MÜŞTERİ</button>
+  <button class="tab-btn active" onclick="showPage('dashboard',this)"><span class="ti">📊</span>ANA</button>
+  <button class="tab-btn" onclick="showPage('fuarlar',this)"><span class="ti">📅</span>FUARLAR</button>
+  <button class="tab-btn" onclick="showPage('siparisler',this)"><span class="ti">📺</span>SİPARİŞ</button>
+  <button class="tab-btn" onclick="showPage('musteriler',this)"><span class="ti">👥</span>MÜŞTERİ</button>
+  <button class="tab-btn" onclick="showPage('urunler',this)"><span class="ti">📦</span>ÜRÜN</button>
 </nav>
 <button class="fab" id="fabBtn" onclick="openAddModal()">＋</button>
 
@@ -161,21 +160,41 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
     <div class="modal-handle"></div>
     <div class="modal-title" id="sipModalTitle">Yeni Sipariş</div>
     <input type="hidden" id="sipEditId">
-    <div class="form-group"><label class="form-label">Müşteri *</label><select class="form-select" id="sipMusteri"><option value="">— Seç —</option></select></div>
-    <div class="form-group"><label class="form-label">Fuar *</label><select class="form-select" id="sipFuar"><option value="">— Seç —</option></select></div>
     <div class="form-group">
-      <label class="form-label">Ekran Tipi *</label>
-      <select class="form-select" id="sipEkranTipi">
-        <option value="">— Seç —</option>
-        <option value="LED Ekran">LED Ekran</option>
-        <option value="LCD Ekran">LCD Ekran</option>
-        <option value="LED + LCD">LED + LCD</option>
-      </select>
+      <label class="form-label">Müşteri *</label>
+      <div style="display:flex;gap:8px">
+        <select class="form-select" id="sipMusteri" style="flex:1"><option value="">— Seç —</option></select>
+        <button class="btn btn-ghost btn-sm" style="white-space:nowrap" onclick="hizliMusteriEkle()">+ Yeni</button>
+      </div>
     </div>
-    <div class="form-group"><label class="form-label">Ebat / Adet</label><input type="text" class="form-input" id="sipEbat" placeholder="örn: 3x2m / 2 adet"></div>
-    <div class="form-group"><label class="form-label">Stand / Konum</label><input type="text" class="form-input" id="sipKonum" placeholder="örn: A-124 Hall 3"></div>
-    <div class="form-group"><label class="form-label">Kurulum Ekibi</label><input type="text" class="form-input" id="sipEkip" placeholder="Ad Soyad"></div>
-    <div class="form-group"><label class="form-label">Not</label><textarea class="form-textarea" id="sipNot" placeholder="Ek bilgi..."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Fuar *</label>
+      <select class="form-select" id="sipFuar"><option value="">— Seç —</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Stand / Konum</label>
+      <input type="text" class="form-input" id="sipKonum" placeholder="örn: A-124 Hall 3">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kurulum Ekibi</label>
+      <input type="text" class="form-input" id="sipEkip" placeholder="Ad Soyad">
+    </div>
+
+    <!-- ÜRÜN KALEMLERİ -->
+    <div class="form-group">
+      <label class="form-label">Ürün Kalemleri</label>
+      <div id="sipUrunSatirlar"></div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <select class="form-select" id="urunSecici" style="flex:1"><option value="">— Ürün Seç —</option></select>
+        <input type="number" class="form-input" id="urunAdet" placeholder="Adet" style="width:80px;padding:12px 8px" min="1" value="1">
+        <button class="btn btn-ghost btn-sm" onclick="urunSatirEkle()">+ Ekle</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Not</label>
+      <textarea class="form-textarea" id="sipNot" placeholder="Ek bilgi..."></textarea>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-ghost" onclick="closeModal('sipModal')">İptal</button>
       <button class="btn btn-primary" onclick="saveSiparis()">💾 Kaydet</button>
@@ -206,6 +225,22 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   </div>
 </div>
 
+<!-- ÜRÜN MODAL -->
+<div class="modal-overlay" id="urunModal" onclick="closeModal('urunModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="urunModalTitle">Yeni Ürün</div>
+    <input type="hidden" id="urunEditId">
+    <div class="form-group"><label class="form-label">Ürün Adı *</label><input type="text" class="form-input" id="urunAdi" placeholder="örn: LED Ekran P3"></div>
+    <div class="form-group"><label class="form-label">Birim</label><input type="text" class="form-input" id="urunBirim" placeholder="örn: adet, m², panel"></div>
+    <div class="form-group"><label class="form-label">Açıklama</label><textarea class="form-textarea" id="urunAciklama" placeholder="Ek bilgi..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost" onclick="closeModal('urunModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveUrun()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
 <!-- FUAR DETAY MODAL -->
 <div class="modal-overlay" id="fuarDetailModal" onclick="closeModal('fuarDetailModal',event)">
   <div class="modal-sheet"><div class="modal-handle"></div><div id="fuarDetailContent"></div></div>
@@ -230,31 +265,61 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 const FUARLAR = [
-  {id:'f1',name:'Avrasya Motosiklet Fuarı',venue:'CNR',startDate:new Date(2026,3,16),endDate:new Date(2026,3,19),vColor:'#e74c3c'},
-  {id:'f2',name:'Motobike Istanbul',venue:'İFM',startDate:new Date(2026,3,22),endDate:new Date(2026,3,25),vColor:'#3498db'},
-  {id:'f3',name:'Ekspomed Eurasia',venue:'TÜYAP',startDate:new Date(2026,3,15),endDate:new Date(2026,3,18),vColor:'#9b59b6'},
-  {id:'f4',name:'IDEX İstanbul',venue:'İFM',startDate:new Date(2026,3,15),endDate:new Date(2026,3,18),vColor:'#1abc9c'},
-  {id:'f5',name:'Franchise İstanbul Expo',venue:'TÜYAP',startDate:new Date(2026,3,16),endDate:new Date(2026,3,19),vColor:'#e67e22'},
-  {id:'f6',name:'Eurobike Istanbul',venue:'İFM',startDate:new Date(2026,3,22),endDate:new Date(2026,3,25),vColor:'#2ecc71'},
-  {id:'f7',name:'SAHA Expo – Savunma & Havacılık',venue:'İFM',startDate:new Date(2026,4,5),endDate:new Date(2026,4,9),vColor:'#c0392b'},
-  {id:'f8',name:'Hostex Istanbul',venue:'CNR',startDate:new Date(2026,4,6),endDate:new Date(2026,4,9),vColor:'#8e44ad'},
-  {id:'f9',name:'Yemek Fuarı İstanbul',venue:'TÜYAP',startDate:new Date(2026,4,13),endDate:new Date(2026,4,16),vColor:'#f39c12'},
-  {id:'f10',name:'Autoshow İstanbul',venue:'CNR',startDate:new Date(2026,4,20),endDate:new Date(2026,4,24),vColor:'#2980b9'},
-  {id:'f11',name:'Buildex İstanbul',venue:'TÜYAP',startDate:new Date(2026,4,27),endDate:new Date(2026,4,30),vColor:'#7f8c8d'},
-  {id:'f12',name:'Teknoloji & Yazılım Fuarı',venue:'İFM',startDate:new Date(2026,5,3),endDate:new Date(2026,5,6),vColor:'#00bcd4'},
-  {id:'f13',name:'Cosmoprof İstanbul',venue:'CNR',startDate:new Date(2026,5,10),endDate:new Date(2026,5,13),vColor:'#e91e63'},
-  {id:'f14',name:'Houseware İstanbul',venue:'TÜYAP',startDate:new Date(2026,5,17),endDate:new Date(2026,5,20),vColor:'#ff9800'},
-  {id:'f15',name:'Turkeybuild İstanbul',venue:'CNR',startDate:new Date(2026,5,24),endDate:new Date(2026,5,27),vColor:'#795548'},
-  {id:'f16',name:'Food & Drink Expo',venue:'İFM',startDate:new Date(2026,6,1),endDate:new Date(2026,6,4),vColor:'#4caf50'},
-  {id:'f17',name:'İstanbul Jewelry Show',venue:'CNR',startDate:new Date(2026,6,8),endDate:new Date(2026,6,11),vColor:'#ffd700'},
-  {id:'f18',name:'Medicana Health Fair',venue:'İFM',startDate:new Date(2026,6,15),endDate:new Date(2026,6,18),vColor:'#00acc1'},
-  {id:'f19',name:'Automechanika İstanbul',venue:'TÜYAP',startDate:new Date(2026,6,22),endDate:new Date(2026,6,25),vColor:'#f44336'},
-  {id:'f20',name:'Tekstil & Moda Fuarı',venue:'CNR',startDate:new Date(2026,7,5),endDate:new Date(2026,7,8),vColor:'#9c27b0'},
+  {id:'f1',  name:"Ekspomed Eurasia – Tıbbi Cihazlar",        startDate:new Date(2026,3,15), endDate:new Date(2026,3,18), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f2',  name:"IDEX İstanbul – Dental Fuar",              startDate:new Date(2026,3,15), endDate:new Date(2026,3,18), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f3',  name:"Franchise İstanbul Expo",                  startDate:new Date(2026,3,16), endDate:new Date(2026,3,19), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f4',  name:"Motobike Istanbul",                        startDate:new Date(2026,3,22), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f5',  name:"Eurobike Istanbul",                        startDate:new Date(2026,3,22), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f6',  name:"AYSAF – Ayakkabı Yan Sanayi",              startDate:new Date(2026,3,22), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f7',  name:"ELES Expo – Elektrik & Akıllı Teknoloji",  startDate:new Date(2026,3,23), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f8',  name:"Fastener Expo Eurasia",                    startDate:new Date(2026,3,27), endDate:new Date(2026,3,30), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f9',  name:"Turkeybuild – 48. Yapı Fuarı",             startDate:new Date(2026,3,27), endDate:new Date(2026,3,30), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f10', name:"NaturFest – Kamp, Karavan & Outdoor",      startDate:new Date(2026,3,30), endDate:new Date(2026,4,3),  venue:"Kadir Topbaş", vColor:"#f7c96a"},
+  {id:'f11', name:"SAHA Expo – Savunma & Havacılık",          startDate:new Date(2026,4,5),  endDate:new Date(2026,4,9),  venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f12', name:"TOS+H Expo – İş Güvenliği",                startDate:new Date(2026,4,6),  endDate:new Date(2026,4,8),  venue:"Kongre",       vColor:"#a8e063"},
+  {id:'f13', name:"Beauty İstanbul – Kozmetik & Güzellik",    startDate:new Date(2026,4,7),  endDate:new Date(2026,4,9),  venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f14', name:"Coffex İstanbul – Kahve Festivali",        startDate:new Date(2026,4,8),  endDate:new Date(2026,4,10), venue:"Lütfi Kırdar", vColor:"#4ecdc4"},
+  {id:'f15', name:"World Sports Istanbul",                    startDate:new Date(2026,4,8),  endDate:new Date(2026,4,10), venue:"Kadir Topbaş", vColor:"#f7c96a"},
+  {id:'f16', name:"Artcontact İstanbul – Çağdaş Sanat",       startDate:new Date(2026,4,13), endDate:new Date(2026,4,17), venue:"Kadir Topbaş", vColor:"#f7c96a"},
+  {id:'f17', name:"Hometex 2026 – Ev Tekstili",               startDate:new Date(2026,4,19), endDate:new Date(2026,4,22), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f18', name:"Automechanika Istanbul",                   startDate:new Date(2026,4,21), endDate:new Date(2026,4,24), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f19', name:"Komatek 2026 – İş & İnşaat Makineleri",   startDate:new Date(2026,5,3),  endDate:new Date(2026,5,6),  venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f20', name:"24. İstanbul Perakende Fuarı",             startDate:new Date(2026,5,3),  endDate:new Date(2026,5,4),  venue:"Haliç",        vColor:"#c96af7"},
+  {id:'f21', name:"İstanbul Av, Silah & Doğa Sporları",       startDate:new Date(2026,5,3),  endDate:new Date(2026,5,6),  venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f22', name:"ITM 2026 – Tekstil Makineleri",            startDate:new Date(2026,5,9),  endDate:new Date(2026,5,13), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f23', name:"Hightex 2026 – Teknik Tekstil",            startDate:new Date(2026,5,9),  endDate:new Date(2026,5,13), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f24', name:"Win Eurasia 2026",                         startDate:new Date(2026,5,10), endDate:new Date(2026,5,13), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f25', name:"Paper Eurasia – Kağıt & Ambalaj",          startDate:new Date(2026,5,10), endDate:new Date(2026,5,12), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f26', name:"Worldef – E-Ticaret Fuarı",                startDate:new Date(2026,5,11), endDate:new Date(2026,5,13), venue:"Kadir Topbaş", vColor:"#f7c96a"},
+  {id:'f27', name:"Busworld Türkiye 2026",                    startDate:new Date(2026,5,17), endDate:new Date(2026,5,19), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f28', name:"PaintIstanbul 2026",                       startDate:new Date(2026,5,17), endDate:new Date(2026,5,19), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f29', name:"IDMA – Un & Değirmen Makineleri",          startDate:new Date(2026,5,25), endDate:new Date(2026,5,27), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f30', name:"F İstanbul – Gıda & İçecek Fuarı",         startDate:new Date(2026,6,1),  endDate:new Date(2026,6,4),  venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f31', name:"18. Umre & Turizm Fuarı",                  startDate:new Date(2026,6,6),  endDate:new Date(2026,6,7),  venue:"Lütfi Kırdar", vColor:"#4ecdc4"},
+  {id:'f32', name:"IFCO – İstanbul Fashion Connection",       startDate:new Date(2026,7,19), endDate:new Date(2026,7,21), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f33', name:"F İstanbul – Gıda (Güz)",                  startDate:new Date(2026,7,26), endDate:new Date(2026,7,29), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f34', name:"Foodist 2026 – Gıda & İçecek",             startDate:new Date(2026,8,1),  endDate:new Date(2026,8,4),  venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f35', name:"Comvex – Ticari Araçlar",                  startDate:new Date(2026,8,1),  endDate:new Date(2026,8,4),  venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f36', name:"Beauty Eurasia – Kozmetik",                startDate:new Date(2026,8,2),  endDate:new Date(2026,8,4),  venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f37', name:"Texhibition İstanbul – Kumaş & Denim",     startDate:new Date(2026,8,9),  endDate:new Date(2026,8,11), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f38', name:"Zuchex – Ev & Mutfak Eşyaları",            startDate:new Date(2026,8,9),  endDate:new Date(2026,8,12), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f39', name:"Electricity Eurasia – Elektrik Fuarı",     startDate:new Date(2026,8,16), endDate:new Date(2026,8,18), venue:"Kadir Topbaş", vColor:"#f7c96a"},
+  {id:'f40', name:"Metal Expo Eurasia",                       startDate:new Date(2026,8,16), endDate:new Date(2026,8,19), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f41', name:"Intermob – Mobilya Yan Sanayi",            startDate:new Date(2026,8,17), endDate:new Date(2026,8,20), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f42', name:"AYMOD – Ayakkabı Moda Fuarı (Güz)",        startDate:new Date(2026,8,23), endDate:new Date(2026,8,26), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f43', name:"MÜSİAD Expo 2026",                         startDate:new Date(2026,8,23), endDate:new Date(2026,8,26), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f44', name:"Maktek Avrasya – Takım Tezgahları",        startDate:new Date(2026,8,28), endDate:new Date(2026,9,3),  venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f45', name:"IJS Jewelry Show – Mücevher",              startDate:new Date(2026,8,30), endDate:new Date(2026,9,3),  venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f46', name:"Data Center Eurasia",                      startDate:new Date(2026,9,7),  endDate:new Date(2026,9,10), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f47', name:"ISAF International – Güvenlik & Yangın",   startDate:new Date(2026,9,7),  endDate:new Date(2026,9,10), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f48', name:"Petzoo Eurasia – Evcil Hayvan",            startDate:new Date(2026,9,7),  endDate:new Date(2026,9,10), venue:"İFM",          vColor:"#4f9cf8"},
+  {id:'f49', name:"TÜYAP Kitap Fuarı",                        startDate:new Date(2026,10,5), endDate:new Date(2026,10,8), venue:"TÜYAP",        vColor:"#f76a8a"},
+  {id:'f50', name:"Karavanist İstanbul (Kış)",                startDate:new Date(2026,11,3), endDate:new Date(2026,11,6), venue:"TÜYAP",        vColor:"#f76a8a"},
 ];
 FUARLAR.forEach(f=>{f.monthName=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][f.startDate.getMonth()];});
 
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
-const STATE={activePage:'dashboard',siparisler:[],musteriler:[],fuarMonthFilter:'Tümü',sipFilter:'hepsi'};
+const STATE={activePage:'dashboard',siparisler:[],musteriler:[],urunler:[],fuarMonthFilter:'Tümü',sipFilter:'hepsi',sipUrunler:[]};
 
 function fmtD(d){return d.getDate()+'.'+(d.getMonth()+1).toString().padStart(2,'0');}
 function fuarStatus(f){if(f.endDate<TODAY)return 'past';if(f.startDate<=TODAY)return 'active';return 'upcoming';}
@@ -265,11 +330,11 @@ window.showPage=function(page,btn){
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  STATE.activePage=page;
-  updateFab();
+  STATE.activePage=page; updateFab();
   if(page==='siparisler')renderSiparisler();
   if(page==='musteriler')renderMusteriler();
   if(page==='fuarlar')renderFuarlar();
+  if(page==='urunler')renderUrunler();
 };
 
 function updateFab(){
@@ -281,16 +346,17 @@ function updateFab(){
 window.openAddModal=function(){
   if(STATE.activePage==='siparisler')openSipModal();
   if(STATE.activePage==='musteriler')openMusteriModal();
+  if(STATE.activePage==='urunler')openUrunModal();
 };
 
 window.closeModal=function(id,e){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');};
 function openM(id){document.getElementById(id).classList.add('open');}
 
+// ── DASHBOARD ──
 function updateDashboard(){
   document.getElementById('dSiparis').textContent=STATE.siparisler.filter(s=>s.durum!=='iptal').length;
   document.getElementById('dFuar').textContent=FUARLAR.filter(f=>fuarStatus(f)==='active').length;
   document.getElementById('dMusteri').textContent=STATE.musteriler.length;
-
   const yakinFuar=FUARLAR.filter(f=>f.startDate>=TODAY).sort((a,b)=>a.startDate-b.startDate)[0];
   const banner=document.getElementById('kurulumBanner');
   if(yakinFuar){
@@ -307,7 +373,6 @@ function updateDashboard(){
       banner.innerHTML=`<div style="background:${bc};border:1px solid ${brd};border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#fff">🔨 <b>${kg<=0?'Bugün':kg+' gün sonra'} kurulum</b> → ${yakinFuar.name.split('–')[0].trim()}<div style="font-size:11px;color:var(--muted);margin-top:4px">Fuar: ${fmtD(yakinFuar.startDate)} · Kurulum: ${fmtD(kt)}</div></div>`;
     } else if(banner) banner.innerHTML='';
   }
-
   const df=document.getElementById('dashFuarlar');
   df.innerHTML=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate).slice(0,3).map(f=>{
     const st=fuarStatus(f);
@@ -318,12 +383,12 @@ function updateDashboard(){
       <div class="fuar-card-date"><span>${fmtD(f.startDate)} → ${fmtD(f.endDate)}</span><span class="venue-tag">${f.venue}</span>${sc>0?`<span class="badge badge-accent">📺 ${sc} sipariş</span>`:''}</div>
     </div>`;
   }).join('');
-
   const ds=document.getElementById('dashSiparisler');
   const son=[...STATE.siparisler].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,3);
   ds.innerHTML=son.length?son.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-text">Henüz sipariş yok</div></div>`;
 }
 
+// ── FUARLAR ──
 window.renderFuarlar=function(){
   const months=['Tümü','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   document.getElementById('monthChips').innerHTML=months.map(m=>`<div class="chip ${STATE.fuarMonthFilter===m?'active':''}" onclick="setFuarMonth('${m}')">${m}</div>`).join('');
@@ -341,13 +406,11 @@ window.renderFuarlar=function(){
     </div>`;
   }).join('');
 };
-
 window.setFuarMonth=function(m){STATE.fuarMonthFilter=m;renderFuarlar();};
 
 window.openFuarDetail=function(fid){
   const f=FUARLAR.find(x=>x.id===fid); if(!f)return;
   const fuarSip=STATE.siparisler.filter(s=>s.fuarId===fid);
-  const st=fuarStatus(f);
   document.getElementById('fuarDetailContent').innerHTML=`
     <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:4px">${f.name}</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${fmtD(f.startDate)}–${fmtD(f.endDate)} · ${f.venue}</div>
@@ -359,52 +422,87 @@ window.openFuarDetail=function(fid){
   openM('fuarDetailModal');
 };
 
+// ── SİPARİŞ KARTI ──
 function sipCard(s){
   const m=STATE.musteriler.find(x=>x.id===s.musteriId);
   const f=FUARLAR.find(x=>x.id===s.fuarId);
   const durumBadge={bekliyor:'<span class="badge badge-yellow">⏳ Bekliyor</span>',onaylandi:'<span class="badge badge-green">✅ Onaylandı</span>',iptal:'<span class="badge badge-red">❌ İptal</span>',teslim:'<span class="badge badge-blue">📦 Teslim</span>'};
+  const urunler=s.urunler||[];
   return `<div class="siparis-card" onclick="openSipDetail('${s.id}')">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <div style="font-size:14px;font-weight:700;color:#fff">${m?.firma||'—'}</div>${durumBadge[s.durum]||''}
     </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">📺 ${s.ekranTipi||'—'}${s.ebat?' · '+s.ebat:''}</div>
+    ${urunler.length?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px">📦 ${urunler.map(u=>`${u.ad} ×${u.adet}`).join(', ')}</div>`:''}
     <div style="font-size:11px;color:var(--muted)">📅 ${f?.name||'—'}${s.konum?' · 📍'+s.konum:''}</div>
   </div>`;
 }
 
+// ── SİPARİŞLER ──
 window.renderSiparisler=function(){
   let list=STATE.siparisler;
   if(STATE.sipFilter!=='hepsi')list=list.filter(s=>s.durum===STATE.sipFilter);
   document.getElementById('sipCount').textContent=list.length+' sipariş';
   document.getElementById('siparisList').innerHTML=list.length?list.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-text">Sipariş bulunamadı</div></div>`;
 };
+window.setSipFilter=function(v,btn){STATE.sipFilter=v;document.querySelectorAll('#sipFilters .chip').forEach(c=>c.classList.remove('active'));if(btn)btn.classList.add('active');renderSiparisler();};
 
-window.setSipFilter=function(v,btn){
-  STATE.sipFilter=v;
-  document.querySelectorAll('#sipFilters .chip').forEach(c=>c.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  renderSiparisler();
+// ── SİPARİŞ MODAL ──
+function doldurMusteriSelect(seciliId=''){
+  document.getElementById('sipMusteri').innerHTML='<option value="">— Müşteri Seç —</option>'+STATE.musteriler.map(m=>`<option value="${m.id}" ${m.id===seciliId?'selected':''}>${m.firma}</option>`).join('');
+}
+function doldurUrunSelect(){
+  document.getElementById('urunSecici').innerHTML='<option value="">— Ürün Seç —</option>'+STATE.urunler.map(u=>`<option value="${u.id}">${u.ad}${u.birim?' ('+u.birim+')':''}</option>`).join('');
+}
+function renderSipUrunler(){
+  document.getElementById('sipUrunSatirlar').innerHTML=STATE.sipUrunler.map((u,i)=>`
+    <div class="urun-satir">
+      <span style="flex:1;font-size:13px;color:#fff">📦 ${u.ad}</span>
+      <span style="font-size:12px;color:var(--muted)">×${u.adet} ${u.birim||''}</span>
+      <button style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer" onclick="sipUrunSil(${i})">×</button>
+    </div>`).join('');
+}
+window.sipUrunSil=function(i){STATE.sipUrunler.splice(i,1);renderSipUrunler();};
+window.urunSatirEkle=function(){
+  const sel=document.getElementById('urunSecici');
+  const adet=parseInt(document.getElementById('urunAdet').value)||1;
+  const uid=sel.value; if(!uid){showToast('⚠️ Ürün seçin');return;}
+  const u=STATE.urunler.find(x=>x.id===uid); if(!u)return;
+  const mevcut=STATE.sipUrunler.findIndex(x=>x.id===uid);
+  if(mevcut>=0){STATE.sipUrunler[mevcut].adet+=adet;}
+  else{STATE.sipUrunler.push({id:u.id,ad:u.ad,birim:u.birim||'',adet});}
+  renderSipUrunler();
+  sel.value=''; document.getElementById('urunAdet').value=1;
 };
 
 window.openSipModal=function(prefuarId=null){
   document.getElementById('sipEditId').value='';
   document.getElementById('sipModalTitle').textContent='Yeni Sipariş';
-  ['sipEbat','sipKonum','sipEkip','sipNot'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('sipMusteri').innerHTML='<option value="">— Müşteri Seç —</option>'+STATE.musteriler.map(m=>`<option value="${m.id}">${m.firma}</option>`).join('');
+  ['sipKonum','sipEkip','sipNot'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  STATE.sipUrunler=[];
+  doldurMusteriSelect();
+  doldurUrunSelect();
+  renderSipUrunler();
   const fuarlar=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
   document.getElementById('sipFuar').innerHTML='<option value="">— Fuar Seç —</option>'+fuarlar.map(f=>`<option value="${f.id}" ${f.id===prefuarId?'selected':''}>${f.name} (${fmtD(f.startDate)})</option>`).join('');
-  document.getElementById('sipEkranTipi').value='';
   openM('sipModal');
+};
+
+window.hizliMusteriEkle=async function(){
+  const firma=prompt('Firma adı:'); if(!firma||!firma.trim())return;
+  try{
+    const ref=await addDoc(collection(db,'musteriler'),{firma:firma.trim(),yetkili:'',tel:'',email:'',not:'',createdAt:serverTimestamp()});
+    showToast('✅ Müşteri eklendi');
+    doldurMusteriSelect(ref.id);
+  }catch(err){showToast('❌ '+err.message);}
 };
 
 window.saveSiparis=async function(){
   const musteriId=document.getElementById('sipMusteri').value;
   const fuarId=document.getElementById('sipFuar').value;
-  const ekranTipi=document.getElementById('sipEkranTipi').value;
   if(!musteriId){showToast('⚠️ Müşteri seçin');return;}
   if(!fuarId){showToast('⚠️ Fuar seçin');return;}
-  if(!ekranTipi){showToast('⚠️ Ekran tipi seçin');return;}
-  const data={musteriId,fuarId,ekranTipi,ebat:document.getElementById('sipEbat').value,konum:document.getElementById('sipKonum').value,ekip:document.getElementById('sipEkip').value,not:document.getElementById('sipNot').value,durum:'bekliyor'};
+  if(!STATE.sipUrunler.length){showToast('⚠️ En az 1 ürün ekleyin');return;}
+  const data={musteriId,fuarId,urunler:STATE.sipUrunler,konum:document.getElementById('sipKonum').value,ekip:document.getElementById('sipEkip').value,not:document.getElementById('sipNot').value,durum:'bekliyor'};
   const editId=document.getElementById('sipEditId').value;
   try{
     if(editId){await updateDoc(doc(db,'siparisler',editId),data);showToast('✅ Güncellendi');}
@@ -417,12 +515,15 @@ window.openSipDetail=function(sid){
   const s=STATE.siparisler.find(x=>x.id===sid); if(!s)return;
   const m=STATE.musteriler.find(x=>x.id===s.musteriId);
   const f=FUARLAR.find(x=>x.id===s.fuarId);
+  const urunler=s.urunler||[];
   document.getElementById('sipDetailContent').innerHTML=`
     <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px">${m?.firma||'—'}</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:16px">📅 ${f?.name||'—'}</div>
+    ${urunler.length?`<div class="card" style="margin-bottom:12px">
+      <div style="font-size:9px;color:var(--muted);margin-bottom:8px">ÜRÜN KALEMLERİ</div>
+      ${urunler.map(u=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:#fff">📦 ${u.ad}</span><span style="color:var(--muted)">×${u.adet} ${u.birim||''}</span></div>`).join('')}
+    </div>`:''}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-      <div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">EKRAN TİPİ</div><div style="font-size:13px;color:#fff;font-weight:600">📺 ${s.ekranTipi||'—'}</div></div>
-      ${s.ebat?`<div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">EBAT/ADET</div><div style="font-size:13px;color:#fff">${s.ebat}</div></div>`:''}
       ${s.konum?`<div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">KONUM</div><div style="font-size:13px;color:#fff">📍 ${s.konum}</div></div>`:''}
       ${s.ekip?`<div class="card"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">KURULUM EKİBİ</div><div style="font-size:13px;color:#fff">🔧 ${s.ekip}</div></div>`:''}
     </div>
@@ -439,14 +540,30 @@ window.openSipDetail=function(sid){
 };
 
 window.updateSipDurum=async function(sid,durum){await updateDoc(doc(db,'siparisler',sid),{durum});showToast('✅ Durum güncellendi');closeModal('sipDetailModal');};
-window.editSiparis=function(sid){const s=STATE.siparisler.find(x=>x.id===sid);if(!s)return;closeModal('sipDetailModal');openSipModal(s.fuarId);setTimeout(()=>{document.getElementById('sipEditId').value=sid;document.getElementById('sipModalTitle').textContent='Sipariş Düzenle';document.getElementById('sipMusteri').value=s.musteriId||'';document.getElementById('sipFuar').value=s.fuarId||'';document.getElementById('sipEkranTipi').value=s.ekranTipi||'';document.getElementById('sipEbat').value=s.ebat||'';document.getElementById('sipKonum').value=s.konum||'';document.getElementById('sipEkip').value=s.ekip||'';document.getElementById('sipNot').value=s.not||'';},100);};
+window.editSiparis=function(sid){
+  const s=STATE.siparisler.find(x=>x.id===sid); if(!s)return;
+  closeModal('sipDetailModal');
+  openSipModal(s.fuarId);
+  setTimeout(()=>{
+    document.getElementById('sipEditId').value=sid;
+    document.getElementById('sipModalTitle').textContent='Sipariş Düzenle';
+    doldurMusteriSelect(s.musteriId||'');
+    document.getElementById('sipFuar').value=s.fuarId||'';
+    document.getElementById('sipKonum').value=s.konum||'';
+    document.getElementById('sipEkip').value=s.ekip||'';
+    document.getElementById('sipNot').value=s.not||'';
+    STATE.sipUrunler=[...(s.urunler||[])];
+    renderSipUrunler();
+  },150);
+};
 window.deleteSiparis=async function(sid){if(!confirm('Sipariş silinsin mi?'))return;await deleteDoc(doc(db,'siparisler',sid));showToast('🗑️ Silindi');closeModal('sipDetailModal');};
 
+// ── MÜŞTERİ ──
 window.renderMusteriler=function(){
   document.getElementById('musteriCount').textContent=STATE.musteriler.length+' müşteri';
   document.getElementById('musteriList').innerHTML=STATE.musteriler.length?STATE.musteriler.map(m=>{
     const sc=STATE.siparisler.filter(s=>s.musteriId===m.id).length;
-    return `<div class="card" style="cursor:pointer">
+    return `<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div style="font-size:15px;font-weight:700;color:#fff">${m.firma}</div>
         <div style="display:flex;gap:6px;align-items:center">
@@ -468,7 +585,6 @@ window.openMusteriModal=function(mid=null){
   if(mid){const m=STATE.musteriler.find(x=>x.id===mid);if(m){document.getElementById('musteriEditId').value=mid;document.getElementById('musteriModalTitle').textContent='Müşteri Düzenle';document.getElementById('mFirma').value=m.firma||'';document.getElementById('mYetkili').value=m.yetkili||'';document.getElementById('mTel').value=m.tel||'';document.getElementById('mEmail').value=m.email||'';document.getElementById('mNot').value=m.not||'';}}
   openM('musteriModal');
 };
-
 window.saveMusteri=async function(){
   const firma=document.getElementById('mFirma').value.trim();
   if(!firma){showToast('⚠️ Firma adı girin');return;}
@@ -480,11 +596,50 @@ window.saveMusteri=async function(){
     closeModal('musteriModal');
   }catch(err){showToast('❌ '+err.message);}
 };
-
 window.deleteMusteri=async function(mid){if(!confirm('Müşteri silinsin mi?'))return;await deleteDoc(doc(db,'musteriler',mid));showToast('🗑️ Silindi');};
+
+// ── ÜRÜNLER ──
+window.renderUrunler=function(){
+  document.getElementById('urunCount').textContent=STATE.urunler.length+' ürün';
+  document.getElementById('urunList').innerHTML=STATE.urunler.length?STATE.urunler.map(u=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#fff">📦 ${u.ad}</div>
+          ${u.birim?`<div style="font-size:12px;color:var(--muted);margin-top:2px">Birim: ${u.birim}</div>`:''}
+          ${u.aciklama?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${u.aciklama}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="openUrunModal('${u.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUrun('${u.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`).join(''):`<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Henüz ürün yok<br><span style="font-size:12px">+ butonuyla ekle</span></div></div>`;
+};
+
+window.openUrunModal=function(uid=null){
+  ['urunAdi','urunBirim','urunAciklama'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('urunEditId').value='';
+  document.getElementById('urunModalTitle').textContent='Yeni Ürün';
+  if(uid){const u=STATE.urunler.find(x=>x.id===uid);if(u){document.getElementById('urunEditId').value=uid;document.getElementById('urunModalTitle').textContent='Ürün Düzenle';document.getElementById('urunAdi').value=u.ad||'';document.getElementById('urunBirim').value=u.birim||'';document.getElementById('urunAciklama').value=u.aciklama||'';}}
+  openM('urunModal');
+};
+window.saveUrun=async function(){
+  const ad=document.getElementById('urunAdi').value.trim();
+  if(!ad){showToast('⚠️ Ürün adı girin');return;}
+  const data={ad,birim:document.getElementById('urunBirim').value,aciklama:document.getElementById('urunAciklama').value};
+  const editId=document.getElementById('urunEditId').value;
+  try{
+    if(editId){await updateDoc(doc(db,'urunler',editId),data);showToast('✅ Güncellendi');}
+    else{data.createdAt=serverTimestamp();await addDoc(collection(db,'urunler'),data);showToast('✅ Ürün eklendi');}
+    closeModal('urunModal');
+  }catch(err){showToast('❌ '+err.message);}
+};
+window.deleteUrun=async function(uid){if(!confirm('Ürün silinsin mi?'))return;await deleteDoc(doc(db,'urunler',uid));showToast('🗑️ Silindi');};
+
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
 
-// ŞİFRE
+// ── ŞİFRE ──
 window.checkLogin=function(){
   if(document.getElementById('loginInput').value==='beyoglu2026'){
     localStorage.setItem('ekranapp_auth','1');
@@ -497,6 +652,7 @@ window.checkLogin=function(){
 function initApp(){
   onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();});
   onSnapshot(collection(db,'musteriler'),snap=>{STATE.musteriler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='musteriler')renderMusteriler();});
+  onSnapshot(collection(db,'urunler'),snap=>{STATE.urunler=snap.docs.map(d=>({id:d.id,...d.data()}));if(STATE.activePage==='urunler')renderUrunler();});
   document.getElementById('todayDate').textContent=TODAY.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[TODAY.getMonth()]+' '+TODAY.getFullYear();
   renderFuarlar(); updateDashboard(); updateFab();
   document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
