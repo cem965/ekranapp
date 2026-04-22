@@ -17,8 +17,8 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 .app-logo{font-size:18px;font-weight:900;color:#fff;}.app-logo span{color:var(--accent);}
 .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
 .tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:rgba(10,10,18,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:50;}
-.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--muted);font-size:9px;font-family:'Roboto',sans-serif;font-weight:500;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;}
-.tab-btn .ti{font-size:20px;}.tab-btn.active{color:var(--accent);}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--muted);font-size:8px;font-family:'Roboto',sans-serif;font-weight:500;cursor:pointer;text-transform:uppercase;letter-spacing:0.3px;}
+.tab-btn .ti{font-size:18px;}.tab-btn.active{color:var(--accent);}
 .page{display:none;padding:calc(var(--header-h)+16px) 16px 16px;min-height:100vh;}.page.active{display:block;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
 .section-title{font-size:28px;font-weight:900;color:#fff;margin-bottom:4px;}
@@ -149,12 +149,20 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <div id="urunList"></div>
 </div>
 
+<!-- STOK TAKİP -->
+<div class="page" id="page-stok">
+  <div class="section-title">Stok Takip</div>
+  <div class="section-sub">FUAR BAZINDA STOK DURUMU</div>
+  <div id="stokTakipList"></div>
+</div>
+
 <nav class="tab-bar">
   <button class="tab-btn active" onclick="showPage('dashboard',this)"><span class="ti">📊</span>ANA</button>
   <button class="tab-btn" onclick="showPage('fuarlar',this)"><span class="ti">📅</span>FUARLAR</button>
   <button class="tab-btn" onclick="showPage('siparisler',this)"><span class="ti">📺</span>SİPARİŞ</button>
   <button class="tab-btn" onclick="showPage('musteriler',this)"><span class="ti">👥</span>MÜŞTERİ</button>
   <button class="tab-btn" onclick="showPage('urunler',this)"><span class="ti">📦</span>ÜRÜN</button>
+  <button class="tab-btn" onclick="showPage('stok',this)"><span class="ti">📊</span>STOK</button>
 </nav>
 <button class="fab" id="fabBtn" onclick="openAddModal()">＋</button>
 
@@ -378,11 +386,12 @@ window.showPage=function(page,btn){
   if(page==='musteriler')renderMusteriler();
   if(page==='fuarlar')renderFuarlar();
   if(page==='urunler')renderUrunler();
+  if(page==='stok')renderStokTakip();
 };
 
 function updateFab(){
   const fab=document.getElementById('fabBtn');
-  if(STATE.activePage==='dashboard'||STATE.activePage==='fuarlar'){fab.style.display='none';return;}
+  if(['dashboard','fuarlar','stok'].includes(STATE.activePage)){fab.style.display='none';return;}
   fab.style.display='flex';
   fab.style.opacity='1';
   fab.style.visibility='visible';
@@ -799,6 +808,44 @@ window.stokKaydet=async function(){
 
 window.deleteUrun=async function(uid){if(!confirm('Ürün silinsin mi?'))return;await deleteDoc(doc(db,'urunler',uid));showToast('🗑️ Silindi');};
 
+
+window.renderStokTakip=function(){
+  const sinir=new Date(TODAY); sinir.setDate(sinir.getDate()-7);
+  const fuarlar=FUARLAR.filter(f=>f.endDate>=sinir).sort((a,b)=>a.startDate-b.startDate);
+  if(!fuarlar.length){
+    document.getElementById('stokTakipList').innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Yakın fuar bulunamadı</div></div>';
+    return;
+  }
+  document.getElementById('stokTakipList').innerHTML=fuarlar.map(f=>{
+    const st=fuarStatus(f);
+    const fuarSip=STATE.siparisler.filter(s=>s.fuarId===f.id&&s.durum!=='iptal'&&s.durum!=='iade');
+    const rezerveMap={};
+    fuarSip.forEach(s=>{(s.urunler||[]).forEach(u=>{rezerveMap[u.id]=(rezerveMap[u.id]||0)+u.adet;});});
+    const stokSatirlari=STATE.urunler.map(u=>{
+      const stok=u.stok||0; const rez=rezerveMap[u.id]||0; const kalan=stok-rez;
+      const rc=kalan<=0?'var(--red)':kalan<=2?'var(--yellow)':'var(--green)';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:13px;color:#fff;font-weight:500">📦 ${u.ad}</div>
+        <div style="display:flex;gap:12px">
+          <div style="text-align:center;min-width:44px"><div style="font-size:16px;font-weight:800;color:var(--yellow)">${rez}</div><div style="font-size:9px;color:var(--muted)">REZV</div></div>
+          <div style="text-align:center;min-width:44px"><div style="font-size:16px;font-weight:800;color:${rc}">${kalan}</div><div style="font-size:9px;color:var(--muted)">KALAN</div></div>
+          <div style="text-align:center;min-width:44px"><div style="font-size:16px;font-weight:800;color:var(--muted)">${stok}</div><div style="font-size:9px;color:var(--muted)">TOPLAM</div></div>
+        </div>
+      </div>`;
+    }).join('');
+    const stBadge=st==='active'?'<span class="badge badge-green">🟢 FUAR AÇIK</span>':st==='past'?'<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--muted)">Geçti</span>':`<span class="badge badge-yellow">${Math.ceil((f.startDate-TODAY)/86400000)} gün sonra</span>`;
+    const bg=st==='past'?'background:rgba(30,30,50,0.5);border-color:rgba(255,255,255,0.06)':`background:linear-gradient(135deg,${f.vColor}33 0%,${f.vColor}11 100%);border-color:${f.vColor}44`;
+    return `<div style="${bg};border:1px solid;border-radius:16px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div style="font-size:15px;font-weight:800;color:#fff;flex:1;padding-right:8px">${f.name}</div>${stBadge}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${fmtD(f.startDate)} → ${fmtD(f.endDate)} · ${f.venue}</div>
+      ${STATE.urunler.length?stokSatirlari:'<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px">Ürün eklenmemiş</div>'}
+    </div>`;
+  }).join('');
+};
+
+
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
 
 // ── ŞİFRE ──
@@ -812,9 +859,9 @@ window.checkLogin=function(){
 };
 
 function initApp(){
-  onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();if(STATE.activePage==='urunler')renderUrunler();});
+  onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();if(STATE.activePage==='urunler')renderUrunler();if(STATE.activePage==='stok')renderStokTakip();});
   onSnapshot(collection(db,'musteriler'),snap=>{STATE.musteriler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='musteriler')renderMusteriler();});
-  onSnapshot(collection(db,'urunler'),snap=>{STATE.urunler=snap.docs.map(d=>({id:d.id,...d.data()}));if(STATE.activePage==='urunler')renderUrunler();});
+  onSnapshot(collection(db,'urunler'),snap=>{STATE.urunler=snap.docs.map(d=>({id:d.id,...d.data()}));if(STATE.activePage==='urunler')renderUrunler();if(STATE.activePage==='stok')renderStokTakip();});
   document.getElementById('todayDate').textContent=TODAY.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[TODAY.getMonth()]+' '+TODAY.getFullYear();
   renderFuarlar(); updateDashboard(); updateFab();
   document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
