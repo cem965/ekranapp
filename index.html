@@ -48,7 +48,7 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 .btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text);}
 .btn-danger{background:rgba(252,92,101,0.15);border:1px solid rgba(252,92,101,0.3);color:var(--red);}
 .btn-full{width:100%;padding:14px;font-size:14px;}.btn-sm{padding:6px 10px;font-size:11px;}
-.fab{position:fixed;bottom:calc(var(--tab-h)+16px);right:16px;width:56px;height:56px;border-radius:18px;background:var(--accent);border:none;color:#000;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,193,162,0.4);z-index:40;}
+.fab{position:fixed;bottom:calc(var(--tab-h)+16px);right:16px;width:56px;height:56px;border-radius:18px;background:var(--accent);border:none;color:#000;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,193,162,0.4);z-index:60;}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
 .modal-sheet{background:#13131f;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;animation:slideUp .25s ease;}
@@ -121,6 +121,7 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 <div class="page" id="page-siparisler">
   <div class="section-title">Siparişler</div>
   <div class="section-sub" id="sipCount">0 sipariş</div>
+  <button class="btn btn-primary btn-full" style="margin-bottom:16px" onclick="openSipModal()">+ Yeni Sipariş Ekle</button>
   <div class="chips-row" id="sipFilters">
     <div class="chip active" onclick="setSipFilter('hepsi',this)">Tümü</div>
     <div class="chip" onclick="setSipFilter('bekliyor',this)">Bekliyor</div>
@@ -135,6 +136,7 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 <div class="page" id="page-musteriler">
   <div class="section-title">Müşteriler</div>
   <div class="section-sub" id="musteriCount">0 müşteri</div>
+  <button class="btn btn-primary btn-full" style="margin-bottom:16px" onclick="openMusteriModal()">+ Yeni Müşteri Ekle</button>
   <div id="musteriList"></div>
 </div>
 
@@ -142,6 +144,7 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 <div class="page" id="page-urunler">
   <div class="section-title">Ürünler</div>
   <div class="section-sub" id="urunCount">0 ürün</div>
+  <button class="btn btn-primary btn-full" style="margin-bottom:16px" onclick="openUrunModal()">+ Yeni Ürün Ekle</button>
   <div id="urunList"></div>
 </div>
 
@@ -341,6 +344,8 @@ function updateFab(){
   const fab=document.getElementById('fabBtn');
   if(STATE.activePage==='dashboard'||STATE.activePage==='fuarlar'){fab.style.display='none';return;}
   fab.style.display='flex';
+  fab.style.opacity='1';
+  fab.style.visibility='visible';
 }
 
 window.openAddModal=function(){
