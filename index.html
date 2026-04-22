@@ -912,23 +912,40 @@ window.deleteUrun=async function(uid){if(!confirm('Ürün silinsin mi?'))return;
 
 
 window.renderStokTakip=function(){
-  const fuarlar=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+  const tumGelecekFuarlar=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+
+  // Siparişi olan fuarlar
+  const siparisFuarIds=new Set(STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade').map(s=>s.fuarId));
+
+  // Siparişi olan fuarlarla çakışan fuarlar
+  const cakisanFuarIds=new Set();
+  tumGelecekFuarlar.forEach(f=>{
+    if(siparisFuarIds.has(f.id)){
+      getCakisanFuarlar(f.id).forEach(c=>cakisanFuarIds.add(c.id));
+    }
+  });
+
+  // Gösterilecek fuarlar: siparişi olanlar + onlarla çakışanlar
+  const fuarlar=tumGelecekFuarlar.filter(f=>siparisFuarIds.has(f.id)||cakisanFuarIds.has(f.id));
+
   if(!fuarlar.length){
-    document.getElementById('stokTakipList').innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Yakın fuar bulunamadı</div></div>';
+    document.getElementById('stokTakipList').innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Siparişli veya çakışan fuar yok</div></div>';
     return;
   }
+
   document.getElementById('stokTakipList').innerHTML=fuarlar.map(f=>{
     const st=fuarStatus(f);
-    const cakisan=getCakisanFuarlar(f.id);
+    const cakisan=getCakisanFuarlar(f.id).filter(c=>siparisFuarIds.has(c.id)||cakisanFuarIds.has(c.id));
+    const buFuarSipCount=STATE.siparisler.filter(s=>s.fuarId===f.id&&s.durum!=='iptal'&&s.durum!=='iade').length;
+    const hasSiparis=siparisFuarIds.has(f.id);
+    const hasCakisma=cakisanFuarIds.has(f.id)&&!hasSiparis;
 
     // Bu fuar + çakışan fuarların tüm siparişleri
-    const ilgiliFuarIds=[f.id,...cakisan.map(c=>c.id)];
+    const ilgiliFuarIds=[f.id,...getCakisanFuarlar(f.id).map(c=>c.id)];
     const tumSiparisler=STATE.siparisler.filter(s=>ilgiliFuarIds.includes(s.fuarId)&&s.durum!=='iptal'&&s.durum!=='iade');
 
-    // Her ürün için rezerve map + hangi fuardan geldiği
-    const rezerveMap={};      // urunId → toplam adet
-    const rezerveDetayMap={}; // urunId → [{fuarId, fuarAdi, musteriAdi, adet}]
-
+    const rezerveMap={};
+    const rezerveDetayMap={};
     tumSiparisler.forEach(s=>{
       const sf=FUARLAR.find(x=>x.id===s.fuarId);
       const m=STATE.musteriler.find(x=>x.id===s.musteriId);
@@ -936,27 +953,20 @@ window.renderStokTakip=function(){
         rezerveMap[u.id]=(rezerveMap[u.id]||0)+u.adet;
         if(!rezerveDetayMap[u.id]) rezerveDetayMap[u.id]=[];
         rezerveDetayMap[u.id].push({
-          sipId:s.id,
-          fuarId:s.fuarId,
+          sipId:s.id, fuarId:s.fuarId,
           fuarAdi:sf?.name.split('–')[0].trim()||'—',
           fuarTarih:`${fmtD(sf?.startDate||new Date())}–${fmtD(sf?.endDate||new Date())}`,
-          musteriAdi:m?.firma||'—',
-          adet:u.adet,
-          cakisan:s.fuarId!==f.id,
-          durum:s.durum
+          musteriAdi:m?.firma||'—', adet:u.adet,
+          cakisan:s.fuarId!==f.id, durum:s.durum
         });
       });
     });
 
     const stokSatirlari=STATE.urunler.map(u=>{
-      const stok=u.stok||0;
-      const rez=rezerveMap[u.id]||0;
-      const kalan=stok-rez;
+      const stok=u.stok||0; const rez=rezerveMap[u.id]||0; const kalan=stok-rez;
       const rc=kalan<=0?'var(--red)':kalan<=2?'var(--yellow)':'var(--green)';
       const detaylar=rezerveDetayMap[u.id]||[];
       const cakisanRez=detaylar.filter(d=>d.cakisan).reduce((t,d)=>t+d.adet,0);
-
-      // Detay popup içeriği
       const detayHtml=detaylar.map(d=>`
         <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
           <div>
@@ -965,17 +975,16 @@ window.renderStokTakip=function(){
           </div>
           <div style="font-size:16px;font-weight:900;color:${d.cakisan?'var(--red)':'var(--yellow)'}">×${d.adet}</div>
         </div>`).join('');
-
       return `<div style="padding:8px 0;border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="flex:1;font-size:13px;color:#fff;font-weight:500">📦 ${u.ad}</div>
           <div style="display:flex;gap:10px">
             <div style="text-align:center;min-width:44px;cursor:${rez>0?'pointer':'default'}"
-              ${rez>0?`onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'"`:''}>
+              ${rez>0?`onclick="this.parentElement.parentElement.querySelector('.rezv-detay').style.display=this.parentElement.parentElement.querySelector('.rezv-detay').style.display==='none'?'block':'none'"`:''}>
               <div style="font-size:16px;font-weight:800;color:${rez>0?(cakisanRez>0?'var(--red)':'var(--yellow)'):'var(--muted)'}">
-                ${rez}${cakisanRez>0?`<span style="font-size:10px">⚠️</span>`:''}
+                ${rez}${cakisanRez>0?'⚠️':''}
               </div>
-              <div style="font-size:9px;color:${rez>0?'var(--yellow)':'var(--muted)'}">${rez>0?'👆 REZV':'REZV'}</div>
+              <div style="font-size:9px;color:${rez>0?'var(--yellow)':'var(--muted)'}">${rez>0?'👆REZV':'REZV'}</div>
             </div>
             <div style="text-align:center;min-width:44px">
               <div style="font-size:16px;font-weight:800;color:${rc}">${kalan}</div>
@@ -987,26 +996,28 @@ window.renderStokTakip=function(){
             </div>
           </div>
         </div>
-        ${rez>0?`<div style="display:none;background:var(--surface2);border-radius:10px;padding:8px;margin-top:6px">
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Kim rezerve etti?</div>
-          ${detayHtml}
-        </div>`:''}
+        ${rez>0?`<div class="rezv-detay" style="display:none;background:var(--surface2);border-radius:10px;padding:8px;margin-top:6px">${detayHtml}</div>`:''}
       </div>`;
     }).join('');
 
-    const stBadge=st==='active'?'<span class="badge badge-green">🟢 FUAR AÇIK</span>':st==='past'?'<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--muted)">Geçti</span>':`<span class="badge badge-yellow">${Math.ceil((f.startDate-TODAY)/86400000)} gün sonra</span>`;
-    const bg=st==='past'?'background:rgba(30,30,50,0.5);border-color:rgba(255,255,255,0.06)':`background:linear-gradient(135deg,${f.vColor}33 0%,${f.vColor}11 100%);border-color:${f.vColor}44`;
+    // Badge
+    const stBadge=st==='active'?'<span class="badge badge-green">🟢 FUAR AÇIK</span>':st==='upcoming'?`<span class="badge badge-yellow">${Math.ceil((f.startDate-TODAY)/86400000)} gün sonra</span>`:'';
+    const sipBadge=hasSiparis?`<span class="badge badge-accent">📺 ${buFuarSipCount} sipariş</span>`:'';
+    const cakismaBadge=cakisan.filter(c=>siparisFuarIds.has(c.id)).length?`<span class="badge badge-red">⚠️ çakışma var</span>`:'';
+    const sadeceCakisanBadge=hasCakisma?'<span class="badge" style="background:rgba(252,92,101,0.1);color:rgba(252,92,101,0.7)">⚠️ Çakışıyor</span>':'';
 
-    const cakisanBadge=cakisan.length?`<span class="badge badge-red" style="margin-left:6px">⚠️ ${cakisan.length} çakışma</span>`:'';
+    const bg=hasSiparis
+      ?`background:linear-gradient(135deg,${f.vColor}44 0%,${f.vColor}22 100%);border-color:${f.vColor}66`
+      :'background:rgba(252,92,101,0.05);border-color:rgba(252,92,101,0.2)';
 
     return `<div style="${bg};border:1px solid;border-radius:16px;padding:14px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px">
-        <div style="font-size:15px;font-weight:800;color:#fff;flex:1;padding-right:8px">${f.name}</div>
-        <div style="display:flex;gap:4px">${stBadge}${cakisanBadge}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:6px;flex-wrap:wrap">
+        <div style="font-size:15px;font-weight:800;color:${hasSiparis?'#fff':'rgba(255,255,255,0.5)'};flex:1">${f.name}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">${stBadge}${sipBadge}${cakismaBadge}${sadeceCakisanBadge}</div>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:${cakisan.length?'6px':'12px'}">${fmtD(f.startDate)} → ${fmtD(f.endDate)} · ${f.venue}</div>
-      ${cakisan.length?`<div style="font-size:11px;color:rgba(252,92,101,0.7);margin-bottom:10px">⚠️ Çakışıyor: ${cakisan.map(c=>`${c.name.split('–')[0].trim()} (${fmtD(c.startDate)}–${fmtD(c.endDate)})`).join(' · ')}</div>`:''}
-      ${STATE.urunler.length?stokSatirlari:'<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px">Ürün eklenmemiş</div>'}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:${cakisan.length?'6px':'10px'}">${fmtD(f.startDate)} → ${fmtD(f.endDate)} · ${f.venue}</div>
+      ${cakisan.filter(c=>siparisFuarIds.has(c.id)).length?`<div style="font-size:11px;color:rgba(252,92,101,0.7);margin-bottom:10px">⚠️ ${cakisan.filter(c=>siparisFuarIds.has(c.id)).map(c=>`${c.name.split('–')[0].trim()} (${fmtD(c.startDate)}–${fmtD(c.endDate)})`).join(' · ')}</div>`:''}
+      ${hasSiparis&&STATE.urunler.length?stokSatirlari:hasCakisma?`<div style="font-size:12px;color:rgba(252,92,101,0.6);padding:6px 0">Bu fuarda sipariş yok ama çakışan fuarlarda sipariş var</div>`:''}
     </div>`;
   }).join('');
 };
