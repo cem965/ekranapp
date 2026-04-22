@@ -117,6 +117,16 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <div id="dashSiparisler"></div>
 </div>
 
+<!-- REZERVE DETAY MODAL -->
+<div class="modal-overlay" id="rezerveDetayModal" onclick="closeModal('rezerveDetayModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="rezerveDetayTitle"></div>
+    <div id="rezerveDetayContent"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="closeModal('rezerveDetayModal')">Kapat</button>
+  </div>
+</div>
+
 <!-- DASH DETAY MODAL -->
 <div class="modal-overlay" id="dashDetayModal" onclick="closeModal('dashDetayModal',event)">
   <div class="modal-sheet">
@@ -884,7 +894,11 @@ window.renderStokTakip=function(){
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
         <div style="flex:1;font-size:13px;color:#fff;font-weight:500">📦 ${u.ad}</div>
         <div style="display:flex;gap:12px">
-          <div style="text-align:center;min-width:44px"><div style="font-size:16px;font-weight:800;color:var(--yellow)">${rez}</div><div style="font-size:9px;color:var(--muted)">REZV</div></div>
+          <div style="text-align:center;min-width:44px;cursor:${rez>0?'pointer':'default'}" ${rez>0?`onclick="rezerveDetay('${u.id}','${f.id}')"`:''}
+            title="${rez>0?'Kim rezerve etti?':''}">
+            <div style="font-size:16px;font-weight:800;color:${rez>0?'var(--yellow)':'var(--muted)'}">${rez}</div>
+            <div style="font-size:9px;color:${rez>0?'var(--yellow)':'var(--muted)'}">${rez>0?'👆 REZV':'REZV'}</div>
+          </div>
           <div style="text-align:center;min-width:44px"><div style="font-size:16px;font-weight:800;color:${rc}">${kalan}</div><div style="font-size:9px;color:var(--muted)">KALAN</div></div>
           <div style="text-align:center;min-width:44px"><div style="font-size:16px;font-weight:800;color:var(--muted)">${stok}</div><div style="font-size:9px;color:var(--muted)">TOPLAM</div></div>
         </div>
@@ -945,6 +959,39 @@ window.dashDetay=function(tip){
     }
   }
   openM('dashDetayModal');
+};
+
+window.rezerveDetay=function(urunId, fuarId){
+  const u=STATE.urunler.find(x=>x.id===urunId);
+  const f=FUARLAR.find(x=>x.id===fuarId);
+  if(!u||!f)return;
+
+  // Bu fuarda bu ürünü kullanan siparişler
+  const siplar=STATE.siparisler.filter(s=>
+    s.fuarId===fuarId &&
+    s.durum!=='iptal' && s.durum!=='iade' &&
+    (s.urunler||[]).some(x=>x.id===urunId)
+  );
+
+  document.getElementById('rezerveDetayTitle').textContent=`📦 ${u.ad} — Rezervasyon Detayı`;
+  document.getElementById('rezerveDetayContent').innerHTML=`
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">📅 ${f.name} · ${fmtD(f.startDate)}–${fmtD(f.endDate)}</div>
+    ${siplar.map(s=>{
+      const m=STATE.musteriler.find(x=>x.id===s.musteriId);
+      const satir=s.urunler.find(x=>x.id===urunId);
+      const durumRenk={bekliyor:'var(--yellow)',onaylandi:'var(--green)',teslim:'var(--blue)',iade:'var(--accent)',iptal:'var(--red)'};
+      return `<div class="card" style="margin-bottom:8px;cursor:pointer;border-left:3px solid ${durumRenk[s.durum]||'var(--border)'}" onclick="closeModal('rezerveDetayModal');openSipDetail('${s.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-size:14px;font-weight:700;color:#fff">${m?.firma||'—'}</div>
+          <span style="font-size:20px;font-weight:900;color:var(--yellow)">×${satir?.adet||0}</span>
+        </div>
+        ${s.konum?`<div style="font-size:12px;color:var(--muted)">📍 ${s.konum}</div>`:''}
+        ${m?.tel?`<div style="font-size:12px;color:var(--muted)">📞 ${m.tel}</div>`:''}
+        <div style="font-size:11px;color:${durumRenk[s.durum]||'var(--muted)'};margin-top:4px">${{bekliyor:'⏳ Bekliyor',onaylandi:'✅ Onaylandı',teslim:'📦 Teslim',iade:'♻️ İade',iptal:'❌ İptal'}[s.durum]||''}</div>
+      </div>`;
+    }).join('')}
+  `;
+  openM('rezerveDetayModal');
 };
 
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
