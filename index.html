@@ -117,6 +117,14 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <div id="dashSiparisler"></div>
 </div>
 
+<!-- MÜŞTERİ DETAY MODAL -->
+<div class="modal-overlay" id="musteriDetayModal" onclick="closeModal('musteriDetayModal',event)">
+  <div class="modal-sheet" style="max-height:92vh">
+    <div class="modal-handle"></div>
+    <div id="musteriDetayContent"></div>
+  </div>
+</div>
+
 <!-- REZERVE DETAY MODAL -->
 <div class="modal-overlay" id="rezerveDetayModal" onclick="closeModal('rezerveDetayModal',event)">
   <div class="modal-sheet">
@@ -780,10 +788,10 @@ window.renderMusteriler=function(){
   // Tüm müşteriler listesi
   document.getElementById('musteriList').innerHTML=STATE.musteriler.length?STATE.musteriler.map(m=>{
     const sc=STATE.siparisler.filter(s=>s.musteriId===m.id).length;
-    return `<div class="card">
+    return `<div class="card" style="cursor:pointer" onclick="openMusteriDetay('${m.id}')">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div style="font-size:15px;font-weight:700;color:#fff">${m.firma}</div>
-        <div style="display:flex;gap:6px;align-items:center">
+        <div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
           ${sc>0?`<span class="badge badge-accent">📺 ${sc}</span>`:''}
           <button class="btn btn-ghost btn-sm" onclick="openMusteriModal('${m.id}')">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteMusteri('${m.id}')">🗑️</button>
@@ -791,8 +799,59 @@ window.renderMusteriler=function(){
       </div>
       ${m.yetkili?`<div style="font-size:12px;color:var(--muted)">👤 ${m.yetkili}</div>`:''}
       ${m.tel?`<div style="font-size:12px;color:var(--muted)">📞 ${m.tel}</div>`:''}
+      ${sc>0?`<div style="font-size:11px;color:var(--accent);margin-top:6px">Siparişleri görüntüle →</div>`:''}
     </div>`;
   }).join(''):`<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">Henüz müşteri yok</div></div>`;
+};
+
+window.openMusteriDetay=function(mid){
+  const m=STATE.musteriler.find(x=>x.id===mid); if(!m)return;
+  const siplar=STATE.siparisler.filter(s=>s.musteriId===mid)
+    .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
+  const durumBadge={
+    bekliyor:'<span class="badge badge-yellow">⏳ Bekliyor</span>',
+    onaylandi:'<span class="badge badge-green">✅ Onaylandı</span>',
+    teslim:'<span class="badge badge-blue">📦 Teslim</span>',
+    iade:'<span class="badge badge-accent">♻️ İade</span>',
+    iptal:'<span class="badge badge-red">❌ İptal</span>'
+  };
+
+  document.getElementById('musteriDetayContent').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div>
+        <div style="font-size:20px;font-weight:900;color:#fff">${m.firma}</div>
+        ${m.yetkili?`<div style="font-size:13px;color:var(--muted);margin-top:2px">👤 ${m.yetkili}</div>`:''}
+        ${m.tel?`<div style="font-size:13px;color:var(--muted)">📞 ${m.tel}</div>`:''}
+        ${m.email?`<div style="font-size:13px;color:var(--muted)">✉️ ${m.email}</div>`:''}
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('musteriDetayModal');openMusteriModal('${mid}')">✏️ Düzenle</button>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">
+      Siparişler (${siplar.length})
+    </div>
+    ${siplar.length ? siplar.map(s=>{
+      const f=FUARLAR.find(x=>x.id===s.fuarId);
+      const urunler=s.urunler||[];
+      const cakisan=f?getCakisanFuarlar(f.id):[];
+      return `<div class="card" style="margin-bottom:8px;cursor:pointer;border-left:3px solid ${s.durum==='onaylandi'?'var(--green)':s.durum==='iptal'?'var(--red)':'var(--border)'}" onclick="closeModal('musteriDetayModal');openSipDetail('${s.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700;color:#fff">${f?.name||'—'}</div>
+          ${durumBadge[s.durum]||''}
+        </div>
+        ${urunler.length?`<div style="font-size:12px;color:var(--accent);margin-bottom:4px">📦 ${urunler.map(u=>u.ad+' ×'+u.adet).join(', ')}</div>`:''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${f?`<span style="font-size:11px;color:var(--muted)">📅 ${fmtD(f.startDate)}–${fmtD(f.endDate)} · ${f.venue}</span>`:''}
+          ${s.konum?`<span style="font-size:11px;color:var(--muted)">📍 ${s.konum}</span>`:''}
+        </div>
+        ${cakisan.length?`<div style="font-size:10px;color:rgba(252,92,101,0.7);margin-top:4px">⚠️ ${cakisan.map(c=>c.name.split('–')[0].trim()).join(', ')} ile çakışıyor</div>`:''}
+      </div>`;
+    }).join('') : `<div class="empty-state" style="padding:20px"><div class="empty-icon">📺</div><div class="empty-text">Sipariş yok</div></div>`}
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="closeModal('musteriDetayModal');openSipModal()">+ Yeni Sipariş Ekle</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeModal('musteriDetayModal')">Kapat</button>
+  `;
+  openM('musteriDetayModal');
 };
 
 window.openMusteriModal=function(mid=null){
