@@ -524,21 +524,32 @@ function updateDashboard(){
 
 // ── FUARLAR ──
 window.renderFuarlar=function(){
-  const months=['Tümü','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const months=['Tümü','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   document.getElementById('monthChips').innerHTML=months.map(m=>`<div class="chip ${STATE.fuarMonthFilter===m?'active':''}" onclick="setFuarMonth('${m}')">${m}</div>`).join('');
-  let list=FUARLAR;
+  let list=[...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>fuarStatus(f)!=='past').sort((a,b)=>a.startDate-b.startDate);
   if(STATE.fuarMonthFilter!=='Tümü')list=list.filter(f=>f.monthName===STATE.fuarMonthFilter);
-  document.getElementById('fuarList').innerHTML=list.map(f=>{
+  document.getElementById('fuarList').innerHTML=list.length?list.map(f=>{
     const st=fuarStatus(f);
-    const bg=st==='past'?'background:rgba(30,30,50,0.8);border-color:rgba(255,255,255,0.06)':`background:linear-gradient(135deg,${f.vColor}55 0%,${f.vColor}22 100%);border-color:${f.vColor}66`;
+    const bg=`background:linear-gradient(135deg,${f.vColor}55 0%,${f.vColor}22 100%);border-color:${f.vColor}66`;
     const sc=STATE.siparisler.filter(s=>s.fuarId===f.id).length;
-    return `<div class="fuar-card ${st}-fuar" style="${bg}" onclick="openFuarDetail('${f.id}')">
-      <div class="fuar-card-header"><div class="fuar-card-name">${f.name}</div>${st==='active'?'<span class="badge badge-green">🟢 FUAR AÇIK</span>':st==='upcoming'?`<span class="badge" style="background:rgba(0,0,0,0.3);color:#fff">${Math.ceil((f.startDate-TODAY)/86400000)} gün sonra</span>`:'<span class="badge" style="background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.4)">Geçti</span>'}</div>
+    const manuelBtns=f.manuel?`<button onclick="event.stopPropagation();openManuelFuarModal('${f.id}')" style="background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✏️</button>
+    <button onclick="event.stopPropagation();deleteManuelFuar('${f.id}')" style="background:rgba(252,92,101,0.2);border:none;color:#fc5c65;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">🗑️</button>`:'';
+    return `<div class="fuar-card" style="${bg}" onclick="openFuarDetail('${f.id}')">
+      <div class="fuar-card-header">
+        <div style="display:flex;align-items:center;gap:6px;flex:1">
+          <div class="fuar-card-name">${f.name}</div>
+          ${f.manuel?'<span style="font-size:9px;background:rgba(255,255,255,0.1);color:#aaa;padding:2px 6px;border-radius:4px">Manuel</span>':''}
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          ${manuelBtns}
+          ${st==='active'?'<span class="badge badge-green">🟢 FUAR AÇIK</span>':`<span class="badge" style="background:rgba(0,0,0,0.3);color:#fff">${Math.ceil((f.startDate-TODAY)/86400000)} gün sonra</span>`}
+        </div>
+      </div>
       <div class="fuar-card-date"><span>${fmtD(f.startDate)} → ${fmtD(f.endDate)}</span><span class="venue-tag">${f.venue}</span></div>
       ${sc>0?`<div style="margin-top:8px"><span class="badge badge-accent">📺 ${sc} sipariş</span></div>`:''}
       ${st==='active'?`<div style="margin-top:8px;font-size:12px;color:#ffcccc;font-weight:700">⏳ Söküme ${Math.ceil((f.endDate-TODAY)/86400000)} gün kaldı</div>`:''}
     </div>`;
-  }).join('');
+  }).join(''):`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Yaklaşan fuar yok</div></div>`;
 };
 window.setFuarMonth=function(m){STATE.fuarMonthFilter=m;renderFuarlar();};
 
@@ -1132,23 +1143,25 @@ window.renderStokTakip=function(){
 window.dashDetay=function(tip){
   const title=document.getElementById('dashDetayTitle');
   const content=document.getElementById('dashDetayContent');
+  const allFuarlar=[...FUARLAR,...(STATE.manuelFuarlar||[])];
+  const aktifFuarIds=new Set(allFuarlar.filter(f=>fuarStatus(f)!=='past').map(f=>f.id));
 
   if(tip==='tumSiparisler'){
     title.textContent='📺 Aktif Siparişler';
-    const list=STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade');
+    const list=STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade'&&aktifFuarIds.has(s.fuarId));
     content.innerHTML=list.length?list.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-text">Aktif sipariş yok</div></div>`;
   }
   else if(tip==='yediGun'){
     title.textContent='⚡ 7 Günde Kurulacaklar';
     const yedi=new Date(TODAY); yedi.setDate(yedi.getDate()+7);
-    const yakinFuarlar=FUARLAR.filter(f=>f.startDate>=TODAY&&f.startDate<=yedi);
+    const yakinFuarlar=allFuarlar.filter(f=>f.startDate>=TODAY&&f.startDate<=yedi);
     const list=STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade'&&yakinFuarlar.some(f=>f.id===s.fuarId));
     content.innerHTML=list.length?list.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">7 gün içinde kurulum yok</div></div>`;
   }
   else if(tip==='onayliFuarlar'){
     title.textContent='✅ Onaylı Fuarlar';
     const onayliFuarIds=[...new Set(STATE.siparisler.filter(s=>s.durum==='onaylandi').map(s=>s.fuarId))];
-    const fuarlar=FUARLAR.filter(f=>onayliFuarIds.includes(f.id)&&f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+    const fuarlar=allFuarlar.filter(f=>onayliFuarIds.includes(f.id)&&f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
     if(!fuarlar.length){
       content.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Onaylı fuar yok</div></div>`;
     } else {
