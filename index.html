@@ -165,6 +165,7 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 <div class="page" id="page-fuarlar">
   <div class="section-title">Fuar Takvimi</div>
   <div class="section-sub">2026 · İSTANBUL</div>
+  <button class="btn btn-primary btn-full" style="margin-bottom:14px" onclick="openManuelFuarModal()">+ Manuel Fuar Ekle</button>
   <div class="chips-row" id="monthChips"></div>
   <div id="fuarList"></div>
 </div>
@@ -353,6 +354,27 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
 </div>
 
 <!-- TOAST -->
+<!-- MANUEL FUAR MODAL -->
+<div class="modal-overlay" id="manuelFuarModal" onclick="closeModal('manuelFuarModal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="manuelFuarTitle">Manuel Fuar Ekle</div>
+    <input type="hidden" id="manuelFuarEditId">
+    <div class="form-group"><label class="form-label">Fuar Adı *</label><input type="text" class="form-input" id="mfAd" placeholder="örn: Ankara Yapı Fuarı"></div>
+    <div class="form-group"><label class="form-label">Sektör</label><input type="text" class="form-input" id="mfSektor" placeholder="örn: İnşaat, Teknoloji"></div>
+    <div class="form-group"><label class="form-label">Şehir</label><input type="text" class="form-input" id="mfSehir" placeholder="örn: Ankara"></div>
+    <div class="form-group"><label class="form-label">Mekan</label><input type="text" class="form-input" id="mfMekan" placeholder="örn: ATO Congresium"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group"><label class="form-label">Başlangıç *</label><input type="date" class="form-input" id="mfBaslangic"></div>
+      <div class="form-group"><label class="form-label">Bitiş *</label><input type="date" class="form-input" id="mfBitis"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="closeModal('manuelFuarModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveManuelFuar()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" style="position:fixed;bottom:calc(var(--tab-h)+16px);left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,50,0.95);border:1px solid var(--border);color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;z-index:200;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;"></div>
 
 <script type="module">
@@ -371,16 +393,6 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 const FUARLAR = [
-  {id:'f1',  name:"Ekspomed Eurasia – Tıbbi Cihazlar",        startDate:new Date(2026,3,15), endDate:new Date(2026,3,18), venue:"TÜYAP",        vColor:"#f76a8a"},
-  {id:'f2',  name:"IDEX İstanbul – Dental Fuar",              startDate:new Date(2026,3,15), endDate:new Date(2026,3,18), venue:"İFM",          vColor:"#4f9cf8"},
-  {id:'f3',  name:"Franchise İstanbul Expo",                  startDate:new Date(2026,3,16), endDate:new Date(2026,3,19), venue:"TÜYAP",        vColor:"#f76a8a"},
-  {id:'f4',  name:"Motobike Istanbul",                        startDate:new Date(2026,3,22), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
-  {id:'f5',  name:"Eurobike Istanbul",                        startDate:new Date(2026,3,22), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
-  {id:'f6',  name:"AYSAF – Ayakkabı Yan Sanayi",              startDate:new Date(2026,3,22), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
-  {id:'f7',  name:"ELES Expo – Elektrik & Akıllı Teknoloji",  startDate:new Date(2026,3,23), endDate:new Date(2026,3,25), venue:"İFM",          vColor:"#4f9cf8"},
-  {id:'f8',  name:"Fastener Expo Eurasia",                    startDate:new Date(2026,3,27), endDate:new Date(2026,3,30), venue:"TÜYAP",        vColor:"#f76a8a"},
-  {id:'f9',  name:"Turkeybuild – 48. Yapı Fuarı",             startDate:new Date(2026,3,27), endDate:new Date(2026,3,30), venue:"TÜYAP",        vColor:"#f76a8a"},
-  {id:'f10', name:"NaturFest – Kamp, Karavan & Outdoor",      startDate:new Date(2026,3,30), endDate:new Date(2026,4,3),  venue:"Kadir Topbaş", vColor:"#f7c96a"},
   {id:'f11', name:"SAHA Expo – Savunma & Havacılık",          startDate:new Date(2026,4,5),  endDate:new Date(2026,4,9),  venue:"İFM",          vColor:"#4f9cf8"},
   {id:'f12', name:"TOS+H Expo – İş Güvenliği",                startDate:new Date(2026,4,6),  endDate:new Date(2026,4,8),  venue:"Kongre",       vColor:"#a8e063"},
   {id:'f13', name:"Beauty İstanbul – Kozmetik & Güzellik",    startDate:new Date(2026,4,7),  endDate:new Date(2026,4,9),  venue:"TÜYAP",        vColor:"#f76a8a"},
@@ -425,7 +437,7 @@ const FUARLAR = [
 FUARLAR.forEach(f=>{f.monthName=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][f.startDate.getMonth()];});
 
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
-const STATE={activePage:'dashboard',siparisler:[],musteriler:[],urunler:[],fuarMonthFilter:'Tümü',sipFilter:'hepsi',sipUrunler:[]};
+const STATE={manuelFuarlar:[],activePage:'dashboard',siparisler:[],musteriler:[],urunler:[],fuarMonthFilter:'Tümü',sipFilter:'hepsi',sipUrunler:[]};
 
 function fmtD(d){return d.getDate()+'.'+(d.getMonth()+1).toString().padStart(2,'0');}
 function fuarStatus(f){if(f.endDate<TODAY)return 'past';if(f.startDate<=TODAY)return 'active';return 'upcoming';}
@@ -464,12 +476,13 @@ function openM(id){document.getElementById(id).classList.add('open');}
 // ── DASHBOARD ──
 function updateDashboard(){
   // Aktif siparişler
-  document.getElementById('dSiparis').textContent=STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade').length;
+  const aktifEkranFuarIds=new Set([...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>fuarStatus(f)!=='past').map(f=>f.id));
+  document.getElementById('dSiparis').textContent=STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade'&&aktifEkranFuarIds.has(s.fuarId)).length;
   document.getElementById('dFuar').textContent=FUARLAR.filter(f=>fuarStatus(f)==='active').length;
 
   // 7 günde kurulacak siparişler
   const yedi=new Date(TODAY); yedi.setDate(yedi.getDate()+7);
-  const yakinFuarlar7=FUARLAR.filter(f=>f.startDate>=TODAY&&f.startDate<=yedi);
+  const yakinFuarlar7=[...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>f.startDate>=TODAY&&f.startDate<=yedi);
   const yakinSip7=STATE.siparisler.filter(s=>
     s.durum!=='iptal'&&s.durum!=='iade'&&
     yakinFuarlar7.some(f=>f.id===s.fuarId)
@@ -479,7 +492,7 @@ function updateDashboard(){
 
   // Sağ alt: onaylı siparişi olan gelecek fuarlar
   const onayliFuarIds=[...new Set(STATE.siparisler.filter(s=>s.durum==='onaylandi').map(s=>s.fuarId))];
-  const onayliFuarlar=FUARLAR.filter(f=>onayliFuarIds.includes(f.id)&&f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+  const onayliFuarlar=[...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>onayliFuarIds.includes(f.id)&&f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
   const musteriEl=document.getElementById('dMusteri');
   if(onayliFuarlar.length){
     musteriEl.innerHTML=onayliFuarlar.slice(0,3).map(f=>
@@ -494,7 +507,7 @@ function updateDashboard(){
   if(banner) banner.innerHTML='';
 
   const df=document.getElementById('dashFuarlar');
-  df.innerHTML=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate).slice(0,3).map(f=>{
+  df.innerHTML=[...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate).slice(0,3).map(f=>{
     const st=fuarStatus(f);
     const sc=STATE.siparisler.filter(s=>s.fuarId===f.id&&s.durum!=='iptal'&&s.durum!=='iade').length;
     const bg=`background:linear-gradient(135deg,${f.vColor}44 0%,${f.vColor}22 100%);border-color:${f.vColor}66`;
@@ -530,7 +543,7 @@ window.renderFuarlar=function(){
 window.setFuarMonth=function(m){STATE.fuarMonthFilter=m;renderFuarlar();};
 
 window.openFuarDetail=function(fid){
-  const f=FUARLAR.find(x=>x.id===fid); if(!f)return;
+  const f=[...FUARLAR,...(STATE.manuelFuarlar||[])].find(x=>x.id===fid); if(!f)return;
   const fuarSip=STATE.siparisler.filter(s=>s.fuarId===fid&&s.durum!=='iptal');
   const st=fuarStatus(f);
   const bitti=f.endDate<TODAY;
@@ -580,7 +593,7 @@ window.openFuarDetail=function(fid){
 };
 
 window.iadeOnayModal=function(fid){
-  const f=FUARLAR.find(x=>x.id===fid);
+  const f=[...FUARLAR,...(STATE.manuelFuarlar||[])].find(x=>x.id===fid);
   const fuarSip=STATE.siparisler.filter(s=>s.fuarId===fid&&s.durum!=='iptal'&&s.durum!=='iade');
   if(!fuarSip.length){showToast('ℹ️ İade edilecek sipariş yok');return;}
   if(!confirm(`${f?.name} fuarının ${fuarSip.length} siparişi "İade" olarak işaretlensin mi? Stoklar serbest kalacak.`))return;
@@ -593,8 +606,9 @@ window.iadeOnayModal=function(fid){
 // ── SİPARİŞ KARTI ──
 // Çakışan fuarları bul
 function getCakisanFuarlar(fuarId){
-  const f=FUARLAR.find(x=>x.id===fuarId); if(!f)return [];
-  return FUARLAR.filter(x=>
+  const allF=[...FUARLAR,...(STATE.manuelFuarlar||[])];
+  const f=allF.find(x=>x.id===fuarId); if(!f)return [];
+  return allF.filter(x=>
     x.id!==fuarId &&
     x.startDate<=f.endDate &&
     x.endDate>=f.startDate
@@ -684,7 +698,7 @@ window.openSipModal=function(prefuarId=null){
   doldurMusteriSelect();
   doldurUrunSelect();
   renderSipUrunler();
-  const fuarlar=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+  const fuarlar=[...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
   document.getElementById('sipFuar').innerHTML='<option value="">— Fuar Seç —</option>'+fuarlar.map(f=>`<option value="${f.id}" ${f.id===prefuarId?'selected':''}>${f.name} (${fmtD(f.startDate)})</option>`).join('');
   openM('sipModal');
 };
@@ -993,7 +1007,7 @@ window.toggleRezv=function(id){
 };
 
 window.renderStokTakip=function(){
-  const tumGelecekFuarlar=FUARLAR.filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
+  const tumGelecekFuarlar=[...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>f.endDate>=TODAY).sort((a,b)=>a.startDate-b.startDate);
 
   // Siparişi olan fuarlar
   const siparisFuarIds=new Set(STATE.siparisler.filter(s=>s.durum!=='iptal'&&s.durum!=='iade').map(s=>s.fuarId));
@@ -1255,7 +1269,7 @@ window.exportPDF=function(){
   <div class="tarih">Oluşturulma: ${tarih} · Toplam: ${onaylilar.length} sipariş</div>`;
 
   Object.entries(grouped).forEach(([fid,siplar])=>{
-    const f=FUARLAR.find(x=>x.id===fid);
+    const f=[...FUARLAR,...(STATE.manuelFuarlar||[])].find(x=>x.id===fid);
     html+=`<div class="fuar">
       <div class="fuar-baslik">${f?.name||'—'} <span class="badge">✅ ${siplar.length} sipariş</span>
         <div class="fuar-tarih">${f?fmtD(f.startDate)+' → '+fmtD(f.endDate)+' · '+f.venue:''}</div>
@@ -1286,6 +1300,55 @@ window.exportPDF=function(){
   showToast('📄 PDF ekranı açıldı — Yazdır/Kaydet');
 };
 
+
+window.openManuelFuarModal=function(fid=null){
+  document.getElementById('manuelFuarEditId').value='';
+  document.getElementById('manuelFuarTitle').textContent='Manuel Fuar Ekle';
+  ['mfAd','mfSektor','mfSehir','mfMekan','mfBaslangic','mfBitis'].forEach(id=>{document.getElementById(id).value='';});
+  if(fid){
+    const f=STATE.manuelFuarlar?.find(x=>x.id===fid);
+    if(f){
+      document.getElementById('manuelFuarEditId').value=fid;
+      document.getElementById('manuelFuarTitle').textContent='Fuar Düzenle';
+      document.getElementById('mfAd').value=f.name||'';
+      document.getElementById('mfSektor').value=f.sektor||'';
+      document.getElementById('mfSehir').value=f.sehir||'';
+      document.getElementById('mfMekan').value=f.venue||'';
+      document.getElementById('mfBaslangic').value=f.startDateStr||'';
+      document.getElementById('mfBitis').value=f.endDateStr||'';
+    }
+  }
+  openM('manuelFuarModal');
+};
+
+window.saveManuelFuar=async function(){
+  const ad=document.getElementById('mfAd').value.trim();
+  const baslangic=document.getElementById('mfBaslangic').value;
+  const bitis=document.getElementById('mfBitis').value;
+  if(!ad){showToast('⚠️ Fuar adı girin');return;}
+  if(!baslangic||!bitis){showToast('⚠️ Tarih girin');return;}
+  const data={
+    name:ad,sektor:document.getElementById('mfSektor').value,
+    sehir:document.getElementById('mfSehir').value,
+    venue:document.getElementById('mfMekan').value||document.getElementById('mfSehir').value,
+    startDateStr:baslangic,endDateStr:bitis,
+    vColor:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),
+    manuel:true
+  };
+  const editId=document.getElementById('manuelFuarEditId').value;
+  try{
+    if(editId){await updateDoc(doc(db,'manuelFuarlar',editId),data);showToast('✅ Güncellendi');}
+    else{data.createdAt=serverTimestamp();await addDoc(collection(db,'manuelFuarlar'),data);showToast('✅ Fuar eklendi');}
+    closeModal('manuelFuarModal');
+  }catch(err){showToast('❌ '+err.message);}
+};
+
+window.deleteManuelFuar=async function(fid){
+  if(!confirm('Bu fuar silinsin mi?'))return;
+  await deleteDoc(doc(db,'manuelFuarlar',fid));
+  showToast('🗑️ Silindi');
+};
+
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
 
 // ── ŞİFRE ──
@@ -1302,6 +1365,18 @@ function initApp(){
   onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();if(STATE.activePage==='urunler')renderUrunler();if(STATE.activePage==='stok')renderStokTakip();});
   onSnapshot(collection(db,'musteriler'),snap=>{STATE.musteriler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='musteriler')renderMusteriler();});
   onSnapshot(collection(db,'urunler'),snap=>{STATE.urunler=snap.docs.map(d=>({id:d.id,...d.data()}));if(STATE.activePage==='urunler')renderUrunler();if(STATE.activePage==='stok')renderStokTakip();});
+  onSnapshot(collection(db,'manuelFuarlar'),snap=>{
+    STATE.manuelFuarlar=snap.docs.map(d=>{
+      const f={id:d.id,...d.data()};
+      f.startDate=new Date(f.startDateStr);
+      f.endDate=new Date(f.endDateStr);
+      f.monthName=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][f.startDate.getMonth()];
+      return f;
+    });
+    updateDashboard();
+    if(STATE.activePage==='fuarlar')renderFuarlar();
+    if(STATE.activePage==='stok')renderStokTakip();
+  });
   document.getElementById('todayDate').textContent=TODAY.getDate()+' '+'Ocak Şubat Mart Nisan Mayıs Haziran Temmuz Ağustos Eylül Ekim Kasım Aralık'.split(' ')[TODAY.getMonth()]+' '+TODAY.getFullYear();
   renderFuarlar(); updateDashboard(); updateFab();
   document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
