@@ -212,6 +212,14 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <div id="stokTakipList"></div>
 </div>
 
+<!-- ARŞİV -->
+<div class="page" id="page-arsiv">
+  <div class="section-title">Arşiv</div>
+  <div class="section-sub">Geçmiş Fuar Siparişleri</div>
+  <div class="chips-row" id="arsivFuarChips"></div>
+  <div id="arsivList"></div>
+</div>
+
 <nav class="tab-bar">
   <button class="tab-btn active" onclick="showPage('dashboard',this)"><span class="ti">📊</span>ANA</button>
   <button class="tab-btn" onclick="showPage('fuarlar',this)"><span class="ti">📅</span>FUARLAR</button>
@@ -219,6 +227,7 @@ body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-
   <button class="tab-btn" onclick="showPage('musteriler',this)"><span class="ti">👥</span>MÜŞTERİ</button>
   <button class="tab-btn" onclick="showPage('urunler',this)"><span class="ti">📦</span>ÜRÜN</button>
   <button class="tab-btn" onclick="showPage('stok',this)"><span class="ti">📊</span>STOK</button>
+  <button class="tab-btn" onclick="showPage('arsiv',this)"><span class="ti">🗂️</span>ARŞİV</button>
 </nav>
 <button class="fab" id="fabBtn" onclick="openAddModal()">＋</button>
 
@@ -437,7 +446,7 @@ const FUARLAR = [
 FUARLAR.forEach(f=>{f.monthName=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][f.startDate.getMonth()];});
 
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
-const STATE={manuelFuarlar:[],activePage:'dashboard',siparisler:[],musteriler:[],urunler:[],fuarMonthFilter:'Tümü',sipFilter:'hepsi',sipUrunler:[]};
+const STATE={manuelFuarlar:[],arsivFuarFilter:null,activePage:'dashboard',siparisler:[],musteriler:[],urunler:[],fuarMonthFilter:'Tümü',sipFilter:'hepsi',sipUrunler:[]};
 
 function fmtD(d){return d.getDate()+'.'+(d.getMonth()+1).toString().padStart(2,'0');}
 function fuarStatus(f){if(f.endDate<TODAY)return 'past';if(f.startDate<=TODAY)return 'active';return 'upcoming';}
@@ -454,11 +463,12 @@ window.showPage=function(page,btn){
   if(page==='fuarlar')renderFuarlar();
   if(page==='urunler')renderUrunler();
   if(page==='stok')renderStokTakip();
+  if(page==='arsiv')renderArsiv();
 };
 
 function updateFab(){
   const fab=document.getElementById('fabBtn');
-  if(['dashboard','fuarlar','stok'].includes(STATE.activePage)){fab.style.display='none';return;}
+  if(['dashboard','fuarlar','stok','arsiv'].includes(STATE.activePage)){fab.style.display='none';return;}
   fab.style.display='flex';
   fab.style.opacity='1';
   fab.style.visibility='visible';
@@ -1364,6 +1374,53 @@ window.deleteManuelFuar=async function(fid){
   showToast('🗑️ Silindi');
 };
 
+window.renderArsiv=function(){
+  // Geçmiş fuarlar
+  const gecmisFuarlar=[...FUARLAR,...(STATE.manuelFuarlar||[])]
+    .filter(f=>fuarStatus(f)==='past')
+    .sort((a,b)=>b.endDate-a.endDate); // En yeni geçmiş üstte
+
+  // Chip filtresi
+  const chips=document.getElementById('arsivFuarChips');
+  chips.innerHTML=`<div class="chip ${!STATE.arsivFuarFilter?'active':''}" onclick="setArsivFilter(null)">Tümü</div>`+
+    gecmisFuarlar.filter(f=>STATE.siparisler.some(s=>s.fuarId===f.id)).map(f=>
+      `<div class="chip ${STATE.arsivFuarFilter===f.id?'active':''}" onclick="setArsivFilter('${f.id}')">${f.name.split('–')[0].trim().substring(0,15)}</div>`
+    ).join('');
+
+  // Siparişleri filtrele
+  const gecmisFuarIds=new Set(gecmisFuarlar.map(f=>f.id));
+  let siplar=STATE.siparisler.filter(s=>gecmisFuarIds.has(s.fuarId));
+  if(STATE.arsivFuarFilter) siplar=siplar.filter(s=>s.fuarId===STATE.arsivFuarFilter);
+
+  if(!siplar.length){
+    document.getElementById('arsivList').innerHTML=`<div class="empty-state"><div class="empty-icon">🗂️</div><div class="empty-text">Arşivde sipariş yok</div></div>`;
+    return;
+  }
+
+  // Fuar bazında grupla
+  const grouped={};
+  siplar.forEach(s=>{
+    if(!grouped[s.fuarId])grouped[s.fuarId]=[];
+    grouped[s.fuarId].push(s);
+  });
+
+  document.getElementById('arsivList').innerHTML=Object.entries(grouped).map(([fid,fsiplar])=>{
+    const f=[...FUARLAR,...(STATE.manuelFuarlar||[])].find(x=>x.id===fid);
+    return `<div style="margin-bottom:20px">
+      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:3px solid ${f?.vColor||'#666'}">
+        <div style="font-size:14px;font-weight:800;color:#fff">${f?.name||'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${f?fmtD(f.startDate)+' → '+fmtD(f.endDate)+' · '+f.venue:''} · ${fsiplar.length} sipariş</div>
+      </div>
+      ${fsiplar.map(s=>sipCard(s)).join('')}
+    </div>`;
+  }).join('');
+};
+
+window.setArsivFilter=function(fid){
+  STATE.arsivFuarFilter=fid;
+  renderArsiv();
+};
+
 window.syncStatus=function(){showToast('☁️ Firebase bağlı · Senkronize');};
 
 // ── ŞİFRE ──
@@ -1377,7 +1434,7 @@ window.checkLogin=function(){
 };
 
 function initApp(){
-  onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();if(STATE.activePage==='urunler')renderUrunler();if(STATE.activePage==='stok')renderStokTakip();});
+  onSnapshot(collection(db,'siparisler'),snap=>{STATE.siparisler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='siparisler')renderSiparisler();if(STATE.activePage==='urunler')renderUrunler();if(STATE.activePage==='stok')renderStokTakip();if(STATE.activePage==='arsiv')renderArsiv();});
   onSnapshot(collection(db,'musteriler'),snap=>{STATE.musteriler=snap.docs.map(d=>({id:d.id,...d.data()}));updateDashboard();if(STATE.activePage==='musteriler')renderMusteriler();});
   onSnapshot(collection(db,'urunler'),snap=>{STATE.urunler=snap.docs.map(d=>({id:d.id,...d.data()}));if(STATE.activePage==='urunler')renderUrunler();if(STATE.activePage==='stok')renderStokTakip();});
   onSnapshot(collection(db,'manuelFuarlar'),snap=>{
