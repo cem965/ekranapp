@@ -666,7 +666,8 @@ function sipCard(s){
 
 // ── SİPARİŞLER ──
 window.renderSiparisler=function(){
-  let list=STATE.siparisler;
+  const aktifFuarIds=new Set([...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>fuarStatus(f)!=='past').map(f=>f.id));
+  let list=STATE.siparisler.filter(s=>aktifFuarIds.has(s.fuarId));
   if(STATE.sipFilter!=='hepsi')list=list.filter(s=>s.durum===STATE.sipFilter);
   document.getElementById('sipCount').textContent=list.length+' sipariş';
   document.getElementById('siparisList').innerHTML=list.length?list.map(s=>sipCard(s)).join(''):`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-text">Sipariş bulunamadı</div></div>`;
@@ -848,7 +849,8 @@ window.renderMusteriler=function(){
 
 window.openMusteriDetay=function(mid){
   const m=STATE.musteriler.find(x=>x.id===mid); if(!m)return;
-  const siplar=STATE.siparisler.filter(s=>s.musteriId===mid)
+  const aktifFuarIds=new Set([...FUARLAR,...(STATE.manuelFuarlar||[])].filter(f=>fuarStatus(f)!=='past').map(f=>f.id));
+  const siplar=STATE.siparisler.filter(s=>s.musteriId===mid&&aktifFuarIds.has(s.fuarId))
     .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
 
   const durumBadge={
